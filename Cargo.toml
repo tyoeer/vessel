@@ -1,0 +1,14 @@
+[package]
+name = "vessel"
+version = "0.1.0"
+edition = "2021"
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[dependencies]
+bevy_flycam = "0.14.1"
+
+[dependencies.bevy]
+version = "0.14"
+features = ["dynamic_linking"]
