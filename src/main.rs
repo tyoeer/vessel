@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 
 
+mod editor;
+
 
 fn main() {
 	App::new()
@@ -14,7 +16,7 @@ fn main() {
 		}),
 		..default()
 	}))
-	
+	.add_plugins(editor::VesselPlugin)
 	// Look
 	.insert_resource(ClearColor(Color::srgb(0.6, 0.7, 1.)))
 	.insert_resource(AmbientLight {
