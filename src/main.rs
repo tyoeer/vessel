@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_mod_picking::debug::DebugPickingMode;
 
 
 mod editor;
@@ -16,6 +17,8 @@ fn main() {
 		}),
 		..default()
 	}))
+	.add_plugins(bevy_mod_picking::DefaultPickingPlugins)
+	.insert_resource(DebugPickingMode::Normal)
 	.add_plugins(editor::VesselPlugin)
 	// Look
 	.insert_resource(ClearColor(Color::srgb(0.6, 0.7, 1.)))
@@ -44,30 +47,7 @@ fn main() {
 
 fn setup_example_graphics(
 	mut commands: Commands,
-	mut meshes: ResMut<Assets<Mesh>>,
-	mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-	let mat = materials.add(
-		StandardMaterial {
-			base_color: Color::srgb(0.9, 0.85, 0.8),
-			perceptual_roughness: 0.9,
-			..default()
-		}
-	);
-	// Ground
-	// commands.spawn(PbrBundle {
-	// 	mesh: meshes.add(Plane3d::default().mesh().size(5.0, 5.0)),
-	// 	material: materials.add(Color::srgb(0.3, 0.5, 0.3)),
-	// 	..default()
-	// });
-	// Cube
-	commands.spawn(PbrBundle {
-		mesh: meshes.add(Cuboid::new(1.0, 1.0, 1.0)),
-		material: mat,
-		transform: Transform::from_xyz(0.0, 0.5, 0.0),
-		..default()
-	});
-	
 	let cam_t = Vec3::new(1.0, 4.0, 2.0);
 	commands.spawn(DirectionalLightBundle {
 		directional_light: DirectionalLight {
