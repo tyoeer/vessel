@@ -27,22 +27,24 @@ fn main() {
 		brightness: 600.,
 	})
 	
-	// Fly camera
-	.add_plugins(bevy_flycam::PlayerPlugin)
-	.insert_resource(bevy_flycam::MovementSettings {
-		sensitivity: 0.0003, // default: 0.00012
-		speed: 12.0, // default: 12.0
-	})
-	.insert_resource(bevy_flycam::KeyBindings {
-		move_ascend: KeyCode::KeyE,
-		move_descend: KeyCode::KeyQ,
-		..default()
-	})
-	
 	// Example graphics
 	.add_systems(Startup, setup_example_graphics)
+	.add_systems(Startup, add_camera)
 	
 	.run();
+}
+
+fn add_camera(
+	mut cmds: Commands,
+) {
+	cmds.spawn(Camera3dBundle {
+		projection: PerspectiveProjection {
+			fov: 80.,
+			..default()
+		}.into(),
+		transform: Transform::default().looking_to(Vec3::X, Vec3::Y),
+		..default()
+	});
 }
 
 fn setup_example_graphics(

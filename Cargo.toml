@@ -7,7 +7,7 @@ edition = "2021"
 opt-level = 3
 
 [dependencies]
-bevy_flycam = "0.14.1"
+
 
 [dependencies.derive_more]
 version = "1.0.0"
