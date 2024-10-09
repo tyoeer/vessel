@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{input::mouse::{MouseButtonInput, MouseWheel}, prelude::*};
 use bevy_mod_picking::debug::DebugPickingMode;
 
 
@@ -17,6 +17,13 @@ fn main() {
 		}),
 		..default()
 	}))
+	.add_plugins(bevy_egui::EguiPlugin)
+	.add_systems(
+		PreUpdate,
+		absorb_egui_inputs
+			.after(bevy_egui::systems::process_input_system)
+			.before(bevy_egui::EguiSet::BeginPass)
+	)
 	.add_plugins(bevy_mod_picking::DefaultPickingPlugins)
 	.insert_resource(DebugPickingMode::Normal)
 	.add_plugins(editor::VesselPlugin)
@@ -30,8 +37,70 @@ fn main() {
 	// Example graphics
 	.add_systems(Startup, setup_example_graphics)
 	.add_systems(Startup, add_camera)
+	.add_systems(Update, ui_test)
 	
 	.run();
+}
+
+fn ui_test(
+	mut contexts: bevy_egui::EguiContexts,
+) {
+	use bevy_egui::egui;
+	let Some(ctx) = contexts.try_ctx_mut() else {
+		// Primary window is missing, because it still is being initialized or has been closed
+		// This system can still run in those conditions, so just do nothing until other systems fix it
+		return;
+	};
+	egui::Window::new("Test").show(ctx, |ui| {
+		ui.label("Hello, world!")
+	});
+}
+
+///Prevents inputs that egui is using from affecting the rest of the game
+// Based on https://github.com/mvlabat/bevy_egui/issues/47#issuecomment-2368811068
+fn absorb_egui_inputs(
+	mut contexts: bevy_egui::EguiContexts,
+	mut mouse: ResMut<ButtonInput<MouseButton>>,
+	mut mouse_wheel: ResMut<Events<MouseWheel>>,
+	mut mouse_button_events: ResMut<Events<MouseButtonInput>>,
+	mut keyboard: ResMut<ButtonInput<KeyCode>>,
+	mut picking_settings: ResMut<bevy_mod_picking::input::InputPluginSettings>
+) {
+	//bevy_mod_picking runs too early, so we have to disable it some other way
+	picking_settings.is_mouse_enabled = true;
+	
+	let Some(ctx) = contexts.try_ctx_mut() else {
+		//Bevy is slow exiting after the window has been closed
+		// So this still runs while there's no context anymore
+		return;
+	};
+	if !ctx.wants_pointer_input() && !ctx.is_pointer_over_area() {
+		return;
+	}
+	
+	picking_settings.is_mouse_enabled = false;
+	
+	let modifiers = [
+		KeyCode::SuperLeft,
+		KeyCode::SuperRight,
+		KeyCode::ControlLeft,
+		KeyCode::ControlRight,
+		KeyCode::AltLeft,
+		KeyCode::AltRight,
+		KeyCode::ShiftLeft,
+		KeyCode::ShiftRight,
+	];
+	
+	let pressed = modifiers.map(|key| keyboard.pressed(key).then_some(key));
+	
+	mouse.reset_all();
+	mouse_wheel.clear();
+	mouse_button_events.clear();
+	keyboard.reset_all();
+	
+	for key in pressed.into_iter().flatten() {
+		keyboard.press(key);
+	}
 }
 
 fn add_camera(

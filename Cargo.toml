@@ -22,6 +22,14 @@ features = [
 	"highlight"
 ]
 
+[dependencies.bevy_egui]
+version = "0.30"
+default-features = false
+features = [
+	"render",
+	"default_fonts",
+]
+
 [dependencies.bevy]
 version = "0.14"
 features = ["dynamic_linking"]
