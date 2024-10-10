@@ -94,13 +94,14 @@ pub fn hotbar_ui(
 		// This system can still run in those conditions, so just do nothing until other systems fix it
 		return;
 	};
-	egui::Window::new("Hotbar").show(ctx, |ui| {
+	
+	egui::Window::new("Hotbar").resizable(true).default_height(50.).show(ctx, |ui| {
 		ui.with_layout(egui::Layout {
 			main_dir: egui::Direction::LeftToRight,
 			main_wrap: false,
-			main_align: egui::Align::Min,
+			main_align: egui::Align::Center,
 			main_justify: false,
-			cross_align: egui::Align::Min,
+			cross_align: egui::Align::Center,
 			cross_justify: false,
 		}, |ui| {
 			for (i, elem) in catalogue.elements.iter().enumerate() {

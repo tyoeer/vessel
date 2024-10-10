@@ -37,12 +37,12 @@ fn main() {
 	// Example graphics
 	.add_systems(Startup, setup_example_graphics)
 	.add_systems(Startup, add_camera)
-	.add_systems(Update, ui_test)
+	.add_systems(Startup, setup_ui_style)
 	
 	.run();
 }
 
-fn ui_test(
+fn setup_ui_style(
 	mut contexts: bevy_egui::EguiContexts,
 ) {
 	use bevy_egui::egui;
@@ -51,8 +51,9 @@ fn ui_test(
 		// This system can still run in those conditions, so just do nothing until other systems fix it
 		return;
 	};
-	egui::Window::new("Test").show(ctx, |ui| {
-		ui.label("Hello, world!")
+	
+	ctx.style_mut(|style| {
+		style.visuals.window_shadow = egui::Shadow::NONE;
 	});
 }
 
