@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use bevy::prelude::*;
 use bevy_mod_picking::PickableBundle;
 
@@ -31,13 +33,30 @@ impl FromWorld for Graphics {
 }
 
 
+#[derive(Resource, Default)]
+pub struct Catalogue {
+	pub elements: Vec<Arc<Element>>,
+}
+
+
+///Object type
+pub struct Element {
+	pub graphics: Graphics,
+}
+
+pub type ElemRef = Arc<Element>;
+
+
 pub fn create_event_handler(
 	mut objs: EventReader<event::Create>,
 	mut cmd: Commands,
-	object_graphics: Res<Graphics>,
 ) {
 	for obj_ev in objs.read() {
-		let object_pos = obj_ev.pos.0;
+		let event::Create {
+			pos,
+			element,
+		} = obj_ev;
+		let object_pos = pos.0;
 		let object_size = IVec3::new(1,1,1);
 		
 		let pos = object_pos.as_vec3();
@@ -45,8 +64,8 @@ pub fn create_event_handler(
 		let transform = Transform::from_translation(pos + offset);
 		
 		cmd.spawn(PbrBundle {
-			mesh: object_graphics.mesh.clone(),
-			material: object_graphics.material.clone(),
+			mesh: element.graphics.mesh.clone(),
+			material: element.graphics.material.clone(),
 			transform,
 			..default()
 		})
@@ -59,10 +78,12 @@ pub fn create_event_handler(
 pub mod event {
 	use bevy::prelude::*;
 	use super::super::VesselPos;
+	use super::*;
 	
 	
 	#[derive(Event)]
 	pub struct Create {
 		pub pos: VesselPos,
+		pub element: Arc<Element>,
 	}
 }

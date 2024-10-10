@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use bevy::{
 	input::{
 		common_conditions::input_just_pressed,
@@ -19,19 +21,101 @@ impl Plugin for VesselPlugin {
 		app
 			.add_event::<object::event::Create>()
 			.init_resource::<object::Graphics>()
+			.init_resource::<object::Catalogue>()
 		;
+	app.add_systems(Startup, 
+		setup_catalogue
+	);
 		app
 			.add_systems(Update, (
 				create_test_obj
 					.run_if(input_just_pressed(KeyCode::Enter)),
 				click_handler,
 				object::create_event_handler,
-				
 				camera,
+				hotbar_ui,
 			))
 		;	
 	}
 }
+
+
+fn setup_catalogue(
+	mut catalogue: ResMut<object::Catalogue>,
+	mut meshes: ResMut<Assets<Mesh>>,
+	mut materials: ResMut<Assets<StandardMaterial>>,
+	mut cmds: Commands,
+) {
+	let cube = meshes.add(Cuboid::new(1.0, 1.0, 1.0));
+	let material = materials.add(StandardMaterial {
+		base_color: Color::srgb(0.9, 0.85, 0.8),
+		perceptual_roughness: 0.9,
+		..default()
+	});
+	let green = materials.add(StandardMaterial {
+		base_color: Color::srgb(0.2, 0.9, 0.2),
+		perceptual_roughness: 0.9,
+		..default()
+	});
+	
+	let elements = vec![
+		object::Element {
+			graphics: object::Graphics {
+				material,
+				mesh: cube.clone()
+			}
+		},
+		object::Element {
+			graphics: object::Graphics {
+				material: green,
+				mesh: cube
+			}
+		},
+	];
+	
+	catalogue.elements.extend(elements.into_iter().map(Arc::new));
+	
+	cmds.insert_resource(SelectedElement(catalogue.elements.first().unwrap().clone()));
+}
+
+
+#[derive(Resource)]
+pub struct SelectedElement(pub object::ElemRef);
+
+
+pub fn hotbar_ui(
+	mut contexts: bevy_egui::EguiContexts,
+	catalogue: Res<object::Catalogue>,
+	mut selected: ResMut<SelectedElement>,
+) {
+	use bevy_egui::egui;
+	let Some(ctx) = contexts.try_ctx_mut() else {
+		// Primary window is missing, because it still is being initialized or has been closed
+		// This system can still run in those conditions, so just do nothing until other systems fix it
+		return;
+	};
+	egui::Window::new("Hotbar").show(ctx, |ui| {
+		ui.with_layout(egui::Layout {
+			main_dir: egui::Direction::LeftToRight,
+			main_wrap: false,
+			main_align: egui::Align::Min,
+			main_justify: false,
+			cross_align: egui::Align::Min,
+			cross_justify: false,
+		}, |ui| {
+			for (i, elem) in catalogue.elements.iter().enumerate() {
+				let button = egui::Button::new(i.to_string())
+					.min_size((40.,40.).into());
+				let button_res = ui.add(button);
+				
+				if button_res.clicked() {
+					*selected = SelectedElement(elem.clone());
+				}
+			}
+		})
+	});
+}
+
 
 const SENSITIVITY: f32 = 0.005;
 const MOVE_SPEED: f32 = 12.;
@@ -102,18 +186,18 @@ pub fn camera(
 	}
 }
 
+
 #[derive(Component, From, Into)]
 pub struct VesselPos(pub IVec3);
 
 
-
-
-
 fn create_test_obj(
 	mut oe: EventWriter<object::event::Create>,
+	selem: Res<SelectedElement>,
 ) {
 	oe.send(object::event::Create {
-		pos: IVec3::new(0, 0, 0).into()
+		pos: IVec3::new(0, 0, 0).into(),
+		element: selem.0.clone(),
 	});
 }
 
@@ -121,6 +205,7 @@ fn click_handler(
 	mut clicks: EventReader<Pointer<Click>>,
 	pos: Query<&VesselPos>,
 	mut create: EventWriter<object::event::Create>,
+	selem: Res<SelectedElement>,
 ) {
 	for click in clicks.read() {
 		let ent = click.target;
@@ -131,7 +216,8 @@ fn click_handler(
 		let pos = old_pos.0 + offset;
 		
 		create.send(object::event::Create {
-			pos: pos.into()
+			pos: pos.into(),
+			element: selem.0.clone(),
 		});
 	}
 }
