@@ -5,26 +5,27 @@ use bevy::{
 	},
 	prelude::*
 };
-use bevy_mod_picking::{
-	events::{Click, Pointer},
-	PickableBundle,
-};
+use bevy_mod_picking::events::{Click, Pointer};
 use derive_more::{From, Into};
+
+
+pub mod object;
+
 
 pub struct VesselPlugin;
 
 impl Plugin for VesselPlugin {
 	fn build(&self, app: &mut App) {
 		app
-			.add_event::<CreateObjectEvent>()
-			.init_resource::<ObjectGraphics>()
+			.add_event::<object::event::Create>()
+			.init_resource::<object::Graphics>()
 		;
 		app
 			.add_systems(Update, (
 				create_test_obj
 					.run_if(input_just_pressed(KeyCode::Enter)),
 				click_handler,
-				add_objects,
+				object::create_event_handler,
 				
 				camera,
 			))
@@ -101,43 +102,17 @@ pub fn camera(
 	}
 }
 
-#[derive(Resource)]
-pub struct ObjectGraphics {
-	pub material: Handle<StandardMaterial>,
-	pub mesh: Handle<Mesh>,
-}
-
-impl FromWorld for ObjectGraphics {
-	fn from_world(world: &mut World) -> Self {
-		let mut meshes = world.get_resource_mut::<Assets<Mesh>>().expect("bevy world should have Assets<Mesh>");
-		let mesh = meshes.add(Cuboid::new(1.0, 1.0, 1.0));
-		
-		let mut materials = world.get_resource_mut::<Assets<StandardMaterial>>().expect("bevy world should have Assets<StandardMaterial>");
-		let material = materials.add(StandardMaterial {
-			base_color: Color::srgb(0.9, 0.85, 0.8),
-			perceptual_roughness: 0.9,
-			..default()
-		});
-		
-		Self {
-			mesh,
-			material,
-		}
-	}
-}
-
 #[derive(Component, From, Into)]
 pub struct VesselPos(pub IVec3);
 
-#[derive(Event)]
-pub struct CreateObjectEvent {
-	pub pos: VesselPos,
-}
+
+
+
 
 fn create_test_obj(
-	mut oe: EventWriter<CreateObjectEvent>,
+	mut oe: EventWriter<object::event::Create>,
 ) {
-	oe.send(CreateObjectEvent {
+	oe.send(object::event::Create {
 		pos: IVec3::new(0, 0, 0).into()
 	});
 }
@@ -145,7 +120,7 @@ fn create_test_obj(
 fn click_handler(
 	mut clicks: EventReader<Pointer<Click>>,
 	pos: Query<&VesselPos>,
-	mut create: EventWriter<CreateObjectEvent>,
+	mut create: EventWriter<object::event::Create>,
 ) {
 	for click in clicks.read() {
 		let ent = click.target;
@@ -155,32 +130,9 @@ fn click_handler(
 		if offset == IVec3::ZERO {continue}
 		let pos = old_pos.0 + offset;
 		
-		create.send(CreateObjectEvent {
+		create.send(object::event::Create {
 			pos: pos.into()
 		});
 	}
 }
 
-fn add_objects(
-	mut objs: EventReader<CreateObjectEvent>,
-	mut cmd: Commands,
-	object_graphics: Res<ObjectGraphics>,
-) {
-	for obj_ev in objs.read() {
-		let object_pos = obj_ev.pos.0;
-		let object_size = IVec3::new(1,1,1);
-		
-		let pos = object_pos.as_vec3();
-		let offset = object_size.as_vec3() / 2.;
-		let transform = Transform::from_translation(pos + offset);
-		
-		cmd.spawn(PbrBundle {
-			mesh: object_graphics.mesh.clone(),
-			material: object_graphics.material.clone(),
-			transform,
-			..default()
-		})
-		.insert(VesselPos::from(object_pos))
-		.insert(PickableBundle::default());
-	}
-}
