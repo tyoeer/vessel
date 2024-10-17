@@ -21,26 +21,32 @@ fn main() {
 	.add_systems(
 		PreUpdate,
 		absorb_egui_inputs
-			.after(bevy_egui::systems::process_input_system)
-			.before(bevy_egui::EguiSet::BeginPass)
+		.after(bevy_egui::systems::process_input_system)
+		.before(bevy_egui::EguiSet::BeginPass)
 	)
 	.add_plugins(bevy_mod_picking::DefaultPickingPlugins)
 	.insert_resource(DebugPickingMode::Normal)
-	.add_plugins(editor::VesselPlugin)
-	// Look
-	.insert_resource(ClearColor(Color::srgb(0.6, 0.7, 1.)))
-	.insert_resource(AmbientLight {
-		color: bevy::color::palettes::css::WHITE.into(),
-		brightness: 600.,
+	
+	.insert_state(GameState::EditVessel)
+	.add_plugins(editor::VesselPlugin {
+		state: GameState::EditVessel
 	})
+	// Look
+	
 	
 	// Example graphics
-	.add_systems(Startup, setup_example_graphics)
-	.add_systems(Startup, add_camera)
 	.add_systems(Startup, setup_ui_style)
 	
 	.run();
 }
+
+
+#[derive(States, Debug,Clone, PartialEq, Eq, Hash)]
+pub enum GameState {
+	WorldPlay,
+	EditVessel,
+}
+
 
 fn setup_ui_style(
 	mut contexts: bevy_egui::EguiContexts,
@@ -102,48 +108,4 @@ fn absorb_egui_inputs(
 	for key in pressed.into_iter().flatten() {
 		keyboard.press(key);
 	}
-}
-
-fn add_camera(
-	mut cmds: Commands,
-) {
-	cmds.spawn(Camera3dBundle {
-		projection: PerspectiveProjection {
-			fov: 80.,
-			..default()
-		}.into(),
-		transform: Transform::default().looking_to(Vec3::X, Vec3::Y),
-		..default()
-	});
-}
-
-fn setup_example_graphics(
-	mut commands: Commands,
-) {
-	let cam_t = Vec3::new(1.0, 4.0, 2.0);
-	commands.spawn(DirectionalLightBundle {
-		directional_light: DirectionalLight {
-			illuminance: light_consts::lux::OVERCAST_DAY / 2.,
-			shadows_enabled: false,
-			..default()
-		},
-		transform: Transform {
-			translation: cam_t,
-			..default()
-		}.looking_at(Vec3::ZERO, Dir3::Y),
-		..default()
-	});
-	//counter light to differentiate the shadows
-	commands.spawn(DirectionalLightBundle {
-		directional_light: DirectionalLight {
-			illuminance: light_consts::lux::OVERCAST_DAY / 7.,
-			shadows_enabled: false,
-			..default()
-		},
-		transform: Transform {
-			translation: Vec3::new(-6.0, -1.0, -3.),
-			..default()
-		}.looking_at(Vec3::ZERO, Dir3::Y),
-		..default()
-	});
 }
