@@ -26,10 +26,15 @@ impl<State: States> Plugin for VesselPlugin<State> {
 			.add_event::<object::event::Create>()
 			.init_resource::<object::Catalogue>()
 		;
-		app.add_systems(Startup, (
-			setup_catalogue,
-			misc::setup_lights,
-			input::setup_camera,
+		app.add_systems(OnEnter(self.state.clone()), (
+			create_root,
+			(
+				misc::setup_lights,
+				input::setup_camera,
+			).after(create_root)
+		));
+		app.add_systems(OnExit(self.state.clone()), (
+			cleanup_root,
 		));
 		app.add_systems(Update, (
 				create_test_obj
@@ -42,12 +47,12 @@ impl<State: States> Plugin for VesselPlugin<State> {
 				misc::hotbar_ui,
 			).in_set(EditorSet)
 			.run_if(in_state(self.state.clone()))
-		);	
+		);
 	}
 }
 
 
-fn setup_catalogue(
+pub fn setup_catalogue(
 	mut catalogue: ResMut<object::Catalogue>,
 	mut meshes: ResMut<Assets<Mesh>>,
 	mut materials: ResMut<Assets<StandardMaterial>>,
@@ -86,14 +91,35 @@ fn setup_catalogue(
 }
 
 
+#[derive(Resource, From, Into, Clone)]
+pub struct EditorRoot(pub Entity);
+
 #[derive(Resource)]
 pub struct SelectedElement(pub object::ElemRef);
-
 
 
 #[derive(Component, From, Into)]
 pub struct VesselPos(pub IVec3);
 
+
+fn create_root(
+	mut cmds: Commands
+) {
+	let root = cmds.spawn_empty()
+		.insert(TransformBundle::default())
+		.insert(VisibilityBundle::default())
+		.id();
+	cmds.insert_resource(EditorRoot(root));
+}
+
+fn cleanup_root(
+	mut cmds: Commands,
+	root: Res<EditorRoot>,
+) {
+	let root = root.0;
+	cmds.entity(root).despawn_recursive();
+	cmds.remove_resource::<EditorRoot>();
+}
 
 fn create_test_obj(
 	mut oe: EventWriter<object::event::Create>,

@@ -31,11 +31,10 @@ fn main() {
 	.add_plugins(editor::VesselPlugin {
 		state: GameState::EditVessel
 	})
-	// Look
 	
-	
-	// Example graphics
 	.add_systems(Startup, setup_ui_style)
+	.add_systems(Startup, editor::setup_catalogue)
+	.add_systems(Update, state_ui)
 	
 	.run();
 }
@@ -45,6 +44,28 @@ fn main() {
 pub enum GameState {
 	WorldPlay,
 	EditVessel,
+}
+
+
+fn state_ui(
+	mut contexts: bevy_egui::EguiContexts,
+	mut next_state: ResMut<NextState<GameState>>,
+) {
+	use bevy_egui::egui;
+	let Some(ctx) = contexts.try_ctx_mut() else {
+		// Primary window is missing, because it still is being initialized or has been closed
+		// This system can still run in those conditions, so just do nothing until other systems fix it
+		return;
+	};
+
+	egui::Window::new("States").resizable(true).show(ctx, |ui| {
+		if ui.button("Edit").clicked() {
+			next_state.set(GameState::EditVessel);
+		}
+		if ui.button("Play").clicked() {
+			next_state.set(GameState::WorldPlay);
+		}
+	});
 }
 
 

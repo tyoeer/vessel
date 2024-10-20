@@ -40,6 +40,7 @@ pub fn hotbar_ui(
 
 pub fn setup_lights(
 	mut cmds: Commands,
+	root: Res<EditorRoot>,
 ) {
 	cmds.insert_resource(ClearColor(Color::srgb(0.6, 0.7, 1.)));
 	cmds.insert_resource(AmbientLight {
@@ -58,7 +59,7 @@ pub fn setup_lights(
 			..default()
 		}.looking_at(Vec3::ZERO, Dir3::Y),
 		..default()
-	});
+	}).set_parent(root.0);
 	//counter light to differentiate the shadows
 	cmds.spawn(DirectionalLightBundle {
 		directional_light: DirectionalLight {
@@ -71,5 +72,5 @@ pub fn setup_lights(
 			..default()
 		}.looking_at(Vec3::ZERO, Dir3::Y),
 		..default()
-	});
+	}).set_parent(root.0);
 }

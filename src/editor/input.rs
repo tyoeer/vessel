@@ -97,6 +97,7 @@ pub fn click_handler(
 
 pub fn setup_camera(
 	mut cmds: Commands,
+	root: Res<EditorRoot>,
 ) {
 	cmds.spawn(Camera3dBundle {
 		projection: PerspectiveProjection {
@@ -105,5 +106,5 @@ pub fn setup_camera(
 		}.into(),
 		transform: Transform::default().looking_to(Vec3::X, Vec3::Y),
 		..default()
-	});
+	}).set_parent(root.0);
 }
