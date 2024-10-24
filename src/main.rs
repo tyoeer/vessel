@@ -3,6 +3,7 @@ use bevy_mod_picking::debug::DebugPickingMode;
 
 
 mod editor;
+mod worldplay;
 
 
 fn main() {
@@ -30,6 +31,9 @@ fn main() {
 	.insert_state(GameState::EditVessel)
 	.add_plugins(editor::VesselPlugin {
 		state: GameState::EditVessel
+	})
+	.add_plugins(worldplay::GameplayPlugin {
+		state: GameState::WorldPlay
 	})
 	
 	.add_systems(Startup, setup_ui_style)
