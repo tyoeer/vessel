@@ -13,6 +13,7 @@ pub struct GameplayPlugin<State: States> {
 
 impl<State: States> Plugin for GameplayPlugin<State> {
 	fn build(&self, app: &mut App) {
+		app.init_resource::<player::CameraSettings>();
 		app.add_systems(OnEnter(self.state.clone()), (
 			create_root,
 			(
@@ -24,14 +25,16 @@ impl<State: States> Plugin for GameplayPlugin<State> {
 		));
 		app.add_systems(Update, (
 				player::move_player,
-				wwd,
+				player::update_camera,
+				player::camera_ui,
+				demo_graphics,
 			)
 			.run_if(in_state(self.state.clone()))
 		);
 	}
 }
 
-pub fn wwd(
+pub fn demo_graphics(
 	mut g: Gizmos,
 ) {
 	g.grid(

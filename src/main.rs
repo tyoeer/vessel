@@ -85,6 +85,7 @@ fn setup_ui_style(
 	
 	ctx.style_mut(|style| {
 		style.visuals.window_shadow = egui::Shadow::NONE;
+		style.spacing.slider_width = 300.;
 	});
 }
 
