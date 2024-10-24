@@ -12,8 +12,6 @@ pub mod object;
 pub mod input;
 pub mod misc;
 
-#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
-pub struct EditorSet;
 
 
 pub struct VesselPlugin<State: States> {
@@ -45,7 +43,7 @@ impl<State: States> Plugin for VesselPlugin<State> {
 				object::create_event_handler,
 				input::move_camera,
 				misc::hotbar_ui,
-			).in_set(EditorSet)
+			)
 			.run_if(in_state(self.state.clone()))
 		);
 	}
@@ -106,8 +104,7 @@ fn create_root(
 	mut cmds: Commands
 ) {
 	let root = cmds.spawn_empty()
-		.insert(TransformBundle::default())
-		.insert(VisibilityBundle::default())
+		.insert(SpatialBundle::default())
 		.id();
 	cmds.insert_resource(EditorRoot(root));
 }
