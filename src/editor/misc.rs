@@ -3,6 +3,36 @@ use bevy::prelude::*;
 use super::*;
 
 
+#[derive(Resource)]
+pub struct EditorVesselData {
+	pub objects: Vec<object::Object>,
+}
+
+impl EditorVesselData {
+	pub fn new() -> Self {
+		Self {
+			objects: Vec::new(),
+		}
+	}
+}
+
+pub fn store_objects(
+	q: Query<(&VesselPos, &object::ElementComponent)>,
+	mut cmds: Commands,
+) {
+	let mut sv = EditorVesselData::new();
+	
+	for (pos, elemc) in &q {
+		sv.objects.push(object::Object {
+			element: elemc.0.clone(),
+			pos: pos.clone(),
+		})
+	}
+	
+	cmds.insert_resource(sv);
+}
+
+
 pub fn hotbar_ui( 
 	mut contexts: bevy_egui::EguiContexts,
 	catalogue: Res<object::Catalogue>,

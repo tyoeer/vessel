@@ -2,8 +2,23 @@ use bevy::prelude::*;
 use super::*;
 
 
-#[derive(Component)]
-pub struct Player {
+#[derive(Resource)]
+pub struct RtVesselData {
+	pub vessel_info: VesselProperties,
+	pub graphics: Vec<VesselGraphicPart>,
+}
+
+
+pub struct VesselGraphicPart {
+	pub mesh: Handle<Mesh>,
+	pub material: Handle<StandardMaterial>,
+	pub transform: Transform,
+}
+
+
+///Separate player stuff to put in the ECS
+#[derive(Component, Clone)]
+pub struct VesselProperties {
 	
 }
 
@@ -29,13 +44,21 @@ impl Default for CameraSettings {
 pub fn spawn_player(
 	mut cmds: Commands,
 	root: Res<GameplayRoot>,
+	player_data: Res<RtVesselData>,
 ) {
-	let player = cmds.spawn(Player {
-		
-	}).insert(SpatialBundle::default())
+	let player = cmds.spawn(player_data.vessel_info.clone()).insert(SpatialBundle::default())
 	.set_parent(root.0)
 	.id();
-
+	
+	for graphic in &player_data.graphics {
+		cmds.spawn(PbrBundle {
+			mesh: graphic.mesh.clone(),
+			material: graphic.material.clone(),
+			transform: graphic.transform,
+			..default()
+		}).set_parent(player);
+	}
+	
 	cmds.spawn(Camera3dBundle {
 		transform: Transform::from_xyz(0., 0., 0.)
 			.looking_at(Vec3::ZERO, Vec3::Y),
@@ -93,7 +116,7 @@ pub fn camera_ui(
 
 
 pub fn move_player(
-	mut players: Query<(&Player, &mut Transform)>,
+	mut players: Query<(&VesselProperties, &mut Transform)>,
 	buttons: Res<ButtonInput<KeyCode>>,
 	timer: Res<Time>,
 ) {

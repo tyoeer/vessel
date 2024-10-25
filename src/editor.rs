@@ -32,6 +32,9 @@ impl<State: States> Plugin for VesselPlugin<State> {
 			).after(create_root)
 		));
 		app.add_systems(OnExit(self.state.clone()), (
+			(
+				misc::store_objects,
+			).before(cleanup_root),
 			cleanup_root,
 		));
 		app.add_systems(Update, (
@@ -96,7 +99,7 @@ pub struct EditorRoot(pub Entity);
 pub struct SelectedElement(pub object::ElemRef);
 
 
-#[derive(Component, From, Into)]
+#[derive(Component, Clone, From, Into)]
 pub struct VesselPos(pub IVec3);
 
 

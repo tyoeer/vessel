@@ -4,6 +4,7 @@ use bevy_mod_picking::debug::DebugPickingMode;
 
 mod editor;
 mod worldplay;
+mod vessel_builder;
 
 
 fn main() {
@@ -35,6 +36,11 @@ fn main() {
 	.add_plugins(worldplay::GameplayPlugin {
 		state: GameState::WorldPlay
 	})
+	
+	.add_systems(OnTransition {
+		exited: GameState::EditVessel,
+		entered: GameState::WorldPlay
+	}, vessel_builder::build_vessel_system)
 	
 	.add_systems(Startup, setup_ui_style)
 	.add_systems(Startup, editor::setup_catalogue)

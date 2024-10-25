@@ -2,8 +2,16 @@ use std::sync::Arc;
 
 use bevy::prelude::*;
 use bevy_mod_picking::PickableBundle;
+use derive_more::derive::{From, Into};
 
-use super::VesselPos;
+use super::{EditorRoot, VesselPos};
+
+
+///Object info separate from ECS
+pub struct Object {
+	pub element: ElemRef,
+	pub pos: VesselPos,
+}
 
 
 
@@ -46,9 +54,13 @@ pub struct Element {
 
 pub type ElemRef = Arc<Element>;
 
+#[derive(Component, Into, From)]
+pub struct ElementComponent(pub ElemRef);
+
 
 pub fn create_event_handler(
 	mut objs: EventReader<event::Create>,
+	root: Res<EditorRoot>,
 	mut cmd: Commands,
 ) {
 	for obj_ev in objs.read() {
@@ -69,7 +81,9 @@ pub fn create_event_handler(
 			transform,
 			..default()
 		})
+		.set_parent(root.0)
 		.insert(VesselPos::from(object_pos))
+		.insert(ElementComponent::from(element.clone()))
 		.insert(PickableBundle::default());
 	}
 }
@@ -84,6 +98,6 @@ pub mod event {
 	#[derive(Event)]
 	pub struct Create {
 		pub pos: VesselPos,
-		pub element: Arc<Element>,
+		pub element: ElemRef,
 	}
 }

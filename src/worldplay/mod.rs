@@ -4,7 +4,7 @@ use bevy::{color::palettes::css::WHITE, prelude::*};
 use derive_more::{From, Into};
 
 
-mod player;
+pub mod player;
 
 
 pub struct GameplayPlugin<State: States> {
