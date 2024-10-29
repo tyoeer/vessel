@@ -1,3 +1,10 @@
+/*!
+Everything to do with objects.
+
+A vessel consists of objects that are placed by the user.
+THe type of an object is it's element.
+*/
+
 use std::sync::Arc;
 
 use bevy::prelude::*;
@@ -41,6 +48,7 @@ impl FromWorld for Graphics {
 }
 
 
+///List of all the available elements
 #[derive(Resource, Default)]
 pub struct Catalogue {
 	pub elements: Vec<Arc<Element>>,
@@ -57,7 +65,7 @@ pub type ElemRef = Arc<Element>;
 #[derive(Component, Into, From)]
 pub struct ElementComponent(pub ElemRef);
 
-
+///Creates objects when [event::Create] happen
 pub fn create_event_handler(
 	mut objs: EventReader<event::Create>,
 	root: Res<EditorRoot>,
@@ -95,6 +103,7 @@ pub mod event {
 	use super::*;
 	
 	
+	///CReates a new object
 	#[derive(Event)]
 	pub struct Create {
 		pub pos: VesselPos,

@@ -1,3 +1,14 @@
+/*!
+Everything related to editing vessels.
+
+"Vessel" is the catch-all term for whatever you can make in the editor
+
+Coordinate system:
+- X+ is forwards
+- Y+ is up
+- Z+ is to the right, making it a right-handed system
+*/
+
 use std::sync::Arc;
 
 use bevy::{
@@ -88,17 +99,19 @@ pub fn setup_catalogue(
 	
 	catalogue.elements.extend(elements.into_iter().map(Arc::new));
 	
-	cmds.insert_resource(SelectedElement(catalogue.elements.first().unwrap().clone()));
+	cmds.insert_resource(Hand(catalogue.elements.first().unwrap().clone()));
 }
 
 
+///Entity all editor entities should be (indirect) children of for state management
 #[derive(Resource, From, Into, Clone)]
 pub struct EditorRoot(pub Entity);
 
+///Element to be placed by the user
 #[derive(Resource)]
-pub struct SelectedElement(pub object::ElemRef);
+pub struct Hand(pub object::ElemRef);
 
-
+///Position of an object within a vessel
 #[derive(Component, Clone, From, Into)]
 pub struct VesselPos(pub IVec3);
 
@@ -121,13 +134,14 @@ fn cleanup_root(
 	cmds.remove_resource::<EditorRoot>();
 }
 
+
 fn create_test_obj(
 	mut oe: EventWriter<object::event::Create>,
-	selem: Res<SelectedElement>,
+	hand: Res<Hand>,
 ) {
 	oe.send(object::event::Create {
 		pos: IVec3::new(0, 0, 0).into(),
-		element: selem.0.clone(),
+		element: hand.0.clone(),
 	});
 }
 

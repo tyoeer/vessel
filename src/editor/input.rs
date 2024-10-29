@@ -77,7 +77,7 @@ pub fn click_handler(
 	mut clicks: EventReader<Pointer<Click>>,
 	pos: Query<&VesselPos>,
 	mut create: EventWriter<object::event::Create>,
-	selem: Res<SelectedElement>,
+	selem: Res<Hand>,
 ) {
 	for click in clicks.read() {
 		let ent = click.target;

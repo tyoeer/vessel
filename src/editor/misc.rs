@@ -36,7 +36,7 @@ pub fn store_objects(
 pub fn hotbar_ui( 
 	mut contexts: bevy_egui::EguiContexts,
 	catalogue: Res<object::Catalogue>,
-	mut selected: ResMut<SelectedElement>,
+	mut selected: ResMut<Hand>,
 ) {
 	use bevy_egui::egui;
 	let Some(ctx) = contexts.try_ctx_mut() else {
@@ -60,7 +60,7 @@ pub fn hotbar_ui(
 				let button_res = ui.add(button);
 				
 				if button_res.clicked() {
-					*selected = SelectedElement(elem.clone());
+					*selected = Hand(elem.clone());
 				}
 			}
 		})
