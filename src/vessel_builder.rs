@@ -1,4 +1,6 @@
 /*!
+Turns an editor vessel into something playable.
+
 
 Vessel pipeline:
 - Editor edits data in the ecs

@@ -1,3 +1,8 @@
+/*!
+Moving around in the world.
+
+*/
+
 use core::f32;
 
 use bevy::{color::palettes::css::WHITE, prelude::*};
@@ -46,6 +51,7 @@ pub fn demo_graphics(
 	);
 }
 
+///Entity all worldplay entities should be (indirect) children of for state management
 #[derive(Resource, From, Into, Clone)]
 pub struct GameplayRoot(pub Entity);
 
