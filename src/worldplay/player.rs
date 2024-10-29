@@ -1,3 +1,4 @@
+use avian3d::prelude::*;
 use bevy::prelude::*;
 use super::*;
 
@@ -46,7 +47,10 @@ pub fn spawn_player(
 	root: Res<GameplayRoot>,
 	player_data: Res<RtVesselData>,
 ) {
-	let player = cmds.spawn(player_data.vessel_info.clone()).insert(SpatialBundle::default())
+	let player = cmds.spawn(player_data.vessel_info.clone())
+	.insert(SpatialBundle::default())
+	.insert(RigidBody::Dynamic)
+	.insert(Collider::sphere(0.5))
 	.set_parent(root.0)
 	.id();
 	
@@ -116,9 +120,8 @@ pub fn camera_ui(
 
 
 pub fn move_player(
-	mut players: Query<(&VesselProperties, &mut Transform)>,
+	mut players: Query<(&VesselProperties, &mut LinearVelocity)>,
 	buttons: Res<ButtonInput<KeyCode>>,
-	timer: Res<Time>,
 ) {
 	let mut move_dir = Vec2::ZERO;
 	
@@ -135,10 +138,9 @@ pub fn move_player(
 		move_dir -= Vec2::X;
 	}
 	
-	for (_player, mut tf) in &mut players {
+	for (_player, mut vel) in &mut players {
 		let speed = 10.;
 		
-		let vel = Vec3::new(move_dir.y, 0., move_dir.x) * speed * timer.delta_seconds();
-		tf.translation += vel;
+		vel.0 = Vec3::new(move_dir.y, 0., move_dir.x) * speed;
 	}
 }

@@ -1,3 +1,4 @@
+use avian3d::PhysicsPlugins;
 use bevy::{input::mouse::{MouseButtonInput, MouseWheel}, prelude::*};
 use bevy_mod_picking::debug::DebugPickingMode;
 
@@ -19,6 +20,9 @@ fn main() {
 		}),
 		..default()
 	}))
+	
+	.add_plugins(PhysicsPlugins::default())
+	
 	.add_plugins(bevy_egui::EguiPlugin)
 	.add_systems(
 		PreUpdate,
