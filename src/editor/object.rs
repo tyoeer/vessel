@@ -1,5 +1,5 @@
 /*!
-Everything to do with objects.
+Everything to do with objects and elements.
 
 A vessel consists of objects that are placed by the user.
 THe type of an object is it's element.
@@ -21,30 +21,9 @@ pub struct Object {
 }
 
 
-
-#[derive(Resource)]
 pub struct Graphics {
 	pub material: Handle<StandardMaterial>,
 	pub mesh: Handle<Mesh>,
-}
-
-impl FromWorld for Graphics {
-	fn from_world(world: &mut World) -> Self {
-		let mut meshes = world.get_resource_mut::<Assets<Mesh>>().expect("bevy world should have Assets<Mesh>");
-		let mesh = meshes.add(Cuboid::new(1.0, 1.0, 1.0));
-		
-		let mut materials = world.get_resource_mut::<Assets<StandardMaterial>>().expect("bevy world should have Assets<StandardMaterial>");
-		let material = materials.add(StandardMaterial {
-			base_color: Color::srgb(0.9, 0.85, 0.8),
-			perceptual_roughness: 0.9,
-			..default()
-		});
-		
-		Self {
-			mesh,
-			material,
-		}
-	}
 }
 
 
