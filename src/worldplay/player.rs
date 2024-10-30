@@ -50,7 +50,7 @@ pub fn spawn_player(
 	let player = cmds.spawn(player_data.vessel_info.clone())
 	.insert(SpatialBundle::default())
 	.insert(RigidBody::Dynamic)
-	.insert(Collider::sphere(0.5))
+	.insert(Collider::cuboid(1., 1., 1.))
 	.set_parent(root.0)
 	.id();
 	
@@ -120,7 +120,7 @@ pub fn camera_ui(
 
 
 pub fn move_player(
-	mut players: Query<(&VesselProperties, &mut LinearVelocity)>,
+	mut players: Query<(&VesselProperties, &Transform, &mut ExternalForce, &mut ExternalTorque, &LinearVelocity, &AngularVelocity)>,
 	buttons: Res<ButtonInput<KeyCode>>,
 ) {
 	let mut move_dir = Vec2::ZERO;
@@ -138,9 +138,28 @@ pub fn move_player(
 		move_dir -= Vec2::X;
 	}
 	
-	for (_player, mut vel) in &mut players {
-		let speed = 10.;
+	for (_player, tf, mut force, mut torque, vel, rot_vel,) in &mut players {
+		let speed_c = 5.;
+		let side_friction_c = 1.;
+		let rot_friction_c = 1.;
+		let rot_speed = f32::consts::TAU * 0.4;
 		
-		vel.0 = Vec3::new(move_dir.y, 0., move_dir.x) * speed;
+		
+		force.persistent = false;
+		torque.persistent = false;
+		
+		// extra frictions
+		
+		let local_vel = tf.rotation.inverse().mul_vec3(vel.0);
+		let side_friction = -local_vel.z * side_friction_c;
+		let friction = Vec3::new(0., 0., side_friction);
+		force.apply_force(tf.rotation * friction);
+		
+		torque.apply_torque(-rot_vel.0 * rot_friction_c);
+		
+		// player control
+		
+		force.apply_force(tf.rotation.mul_vec3(Vec3::X * speed_c * move_dir.y));
+		torque.apply_torque(Quat::from_rotation_y(move_dir.x * -rot_speed).to_scaled_axis());
 	}
 }

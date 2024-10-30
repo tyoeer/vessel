@@ -5,7 +5,7 @@ Moving around in the world.
 
 use core::f32;
 
-use bevy::{color::palettes::css::WHITE, prelude::*};
+use bevy::prelude::*;
 use derive_more::{From, Into};
 
 
@@ -32,24 +32,12 @@ impl<State: States> Plugin for GameplayPlugin<State> {
 				player::move_player,
 				player::update_camera,
 				player::camera_ui,
-				demo_graphics,
 			)
 			.run_if(in_state(self.state.clone()))
 		);
 	}
 }
 
-pub fn demo_graphics(
-	mut g: Gizmos,
-) {
-	g.grid(
-		Vec3::ZERO,
-		Quat::from_rotation_x(f32::consts::TAU/4.),
-		UVec2::new(30,30),
-		Vec2::new(1.,1.),
-		WHITE
-	);
-}
 
 ///Entity all worldplay entities should be (indirect) children of for state management
 #[derive(Resource, From, Into, Clone)]

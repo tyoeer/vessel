@@ -47,6 +47,7 @@ fn main() {
 	}, vessel_builder::build_vessel_system)
 	
 	.add_systems(Startup, setup_ui_style)
+	.add_systems(Startup, setup_demo_track)
 	.add_systems(Startup, editor::setup_catalogue)
 	.add_systems(Update, state_ui)
 	
@@ -58,6 +59,27 @@ fn main() {
 pub enum GameState {
 	WorldPlay,
 	EditVessel,
+}
+
+
+fn setup_demo_track(
+	mut cmds: Commands,
+	assets: ResMut<AssetServer>
+) {
+	use avian3d::prelude::*;
+	
+	let scene = assets.load("local/track.glb#Scene0");
+	cmds.spawn(SceneBundle {
+		scene,
+		transform: Transform::from_xyz(0.,-10.,-5.),
+		..default()
+	})
+	.insert(ColliderConstructorHierarchy::new(ColliderConstructor::TrimeshFromMeshWithConfig(
+		TrimeshFlags::MERGE_DUPLICATE_VERTICES | TrimeshFlags::DELETE_DEGENERATE_TRIANGLES
+		| TrimeshFlags::DELETE_DUPLICATE_TRIANGLES | TrimeshFlags::FIX_INTERNAL_EDGES
+		| TrimeshFlags::DELETE_BAD_TOPOLOGY_TRIANGLES
+	)))
+	.insert(RigidBody::Static);
 }
 
 
