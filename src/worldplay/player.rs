@@ -161,7 +161,13 @@ pub fn move_player(
 		
 		// player control
 		
-		force.apply_force(tf.rotation.mul_vec3(Vec3::X * vessel.control_forwards_force * move_dir.y));
+		let accel_dir_world_space = tf.rotation.mul_vec3(Vec3::X);
+		//Remove flying capabilities
+		let accel_dir_world_space = accel_dir_world_space.with_y(0.).normalize();
+		let accel_force = vessel.control_forwards_force * move_dir.y;
+		
+		force.apply_force(accel_dir_world_space * accel_force);
+		
 		torque.apply_torque(Quat::from_rotation_y(move_dir.x * -vessel.control_torque).to_scaled_axis());
 	}
 }
