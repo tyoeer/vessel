@@ -17,9 +17,17 @@ pub struct VesselGraphicPart {
 }
 
 
-///Separate player stuff to put in the ECS
+///Behaviour of a vessel
 #[derive(Component, Clone)]
 pub struct VesselProperties {
+	///How much forwards force to apply when the input is fully forwards
+	pub control_forwards_force: f32,
+	///How much torque to apply for horizontal turning when the input is fully left or right.
+	pub control_torque: f32,
+	///Fraction/ratio of the sideways (left/right) speed to apply as counter-force to reduce sideways speed.
+	pub side_friction: f32,
+	///Fraction/ratio of the rotation speed to apply as counter-torque to reduce rotary speed.
+	pub rotary_friction: f32
 	
 }
 
@@ -138,28 +146,22 @@ pub fn move_player(
 		move_dir -= Vec2::X;
 	}
 	
-	for (_player, tf, mut force, mut torque, vel, rot_vel,) in &mut players {
-		let speed_c = 5.;
-		let side_friction_c = 1.;
-		let rot_friction_c = 1.;
-		let rot_speed = f32::consts::TAU * 0.4;
-		
-		
+	for (vessel, tf, mut force, mut torque, vel, rot_vel,) in &mut players {
 		force.persistent = false;
 		torque.persistent = false;
 		
 		// extra frictions
 		
 		let local_vel = tf.rotation.inverse().mul_vec3(vel.0);
-		let side_friction = -local_vel.z * side_friction_c;
+		let side_friction = -local_vel.z * vessel.side_friction;
 		let friction = Vec3::new(0., 0., side_friction);
 		force.apply_force(tf.rotation * friction);
 		
-		torque.apply_torque(-rot_vel.0 * rot_friction_c);
+		torque.apply_torque(-rot_vel.0 * vessel.rotary_friction);
 		
 		// player control
 		
-		force.apply_force(tf.rotation.mul_vec3(Vec3::X * speed_c * move_dir.y));
-		torque.apply_torque(Quat::from_rotation_y(move_dir.x * -rot_speed).to_scaled_axis());
+		force.apply_force(tf.rotation.mul_vec3(Vec3::X * vessel.control_forwards_force * move_dir.y));
+		torque.apply_torque(Quat::from_rotation_y(move_dir.x * -vessel.control_torque).to_scaled_axis());
 	}
 }
