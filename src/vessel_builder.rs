@@ -51,10 +51,10 @@ pub fn build_vessel(
 	
 	RtVesselData {
 		vessel_info: VesselProperties {
-			control_forwards_force: 5.,
-			control_torque: std::f32::consts::TAU * 0.4,
-			side_friction: 1.,
-			rotary_friction: 1.,
+			control_forwards_force: 1.,
+			control_torque: std::f32::consts::TAU * 0.06,
+			side_friction: 0.5,
+			rotary_friction: 0.1,
 		},
 		graphics,
 	}
