@@ -26,8 +26,10 @@ pub struct VesselProperties {
 	pub control_torque: f32,
 	///Fraction/ratio of the sideways (left/right) speed to apply as counter-force to reduce sideways speed.
 	pub side_friction: f32,
-	///Fraction/ratio of the rotation speed to apply as counter-torque to reduce rotary speed.
-	pub rotary_friction: f32
+	///Fraction/ratio of the horizontal rotation speed to apply as counter-torque to reduce rotary speed.
+	pub rotary_friction_hor: f32,
+	///Fraction/ratio of the non-horizontal rotation speed to apply as counter-torque to reduce rotary speed.
+	pub rotary_friction_ver: f32,
 	
 }
 
@@ -157,7 +159,10 @@ pub fn move_player(
 		let friction = Vec3::new(0., 0., side_friction);
 		force.apply_force(tf.rotation * friction);
 		
-		torque.apply_torque(-rot_vel.0 * vessel.rotary_friction);
+		let ver_rot = rot_vel.0.with_y(0.);
+		let hor_rot = rot_vel.0.with_x(0.).with_z(0.);
+		torque.apply_torque(-hor_rot * vessel.rotary_friction_hor);
+		torque.apply_torque(-ver_rot * vessel.rotary_friction_ver);
 		
 		// player control
 		

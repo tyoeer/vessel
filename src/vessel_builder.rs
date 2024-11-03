@@ -54,7 +54,8 @@ pub fn build_vessel(
 			control_forwards_force: 1.,
 			control_torque: std::f32::consts::TAU * 0.06,
 			side_friction: 0.5,
-			rotary_friction: 0.1,
+			rotary_friction_hor: 0.1,
+			rotary_friction_ver: 0.6,
 		},
 		graphics,
 	}
