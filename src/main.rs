@@ -6,6 +6,7 @@ use bevy_mod_picking::debug::DebugPickingMode;
 mod editor;
 mod worldplay;
 mod vessel_builder;
+mod network;
 
 
 fn main() {
@@ -22,6 +23,12 @@ fn main() {
 	}))
 	
 	.add_plugins(PhysicsPlugins::default())
+	
+	.add_plugins((
+		bevy_replicon::RepliconPlugins,
+		bevy_replicon_renet::RepliconRenetPlugins,
+	))
+	.add_systems(Update, network::network_ui)
 	
 	.add_plugins(bevy_egui::EguiPlugin)
 	.add_systems(
