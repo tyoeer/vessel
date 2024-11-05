@@ -7,6 +7,7 @@ mod editor;
 mod worldplay;
 mod vessel_builder;
 mod network;
+mod multiplayer;
 
 
 fn main() {
@@ -27,6 +28,7 @@ fn main() {
 	.add_plugins((
 		bevy_replicon::RepliconPlugins,
 		bevy_replicon_renet::RepliconRenetPlugins,
+		multiplayer::MultiplayerPlugin,
 	))
 	.add_systems(Update, network::network_ui)
 	

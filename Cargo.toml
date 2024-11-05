@@ -10,6 +10,7 @@ opt-level = 3
 avian3d = "0.1.2"
 bevy_replicon = "0.28.4"
 bevy_replicon_renet = "0.5.0"
+serde = "1.0.214"
 
 
 [dependencies.derive_more]
