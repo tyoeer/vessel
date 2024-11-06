@@ -30,9 +30,9 @@ impl<State: States> Plugin for GameplayPlugin<State> {
 			cleanup_root,
 		));
 		app.add_systems(Update, (
-				player::spawn_players,
+				player::spawn_players.before(avian3d::prelude::PhysicsSet::Prepare),
 				player::read_player_input.before(player::move_player),
-				player::move_player,
+				player::move_player.before(avian3d::prelude::PhysicsSet::StepSimulation),
 				player::update_camera,
 				player::camera_ui,
 			)
@@ -47,13 +47,13 @@ pub fn spawn_player(
 	player_data: Res<player::RtVesselData>,
 	mut spawn_events: EventWriter<player::SpawnEvent>,
 ) {
-	let id = cmds.spawn_empty().id();
+	let id = cmds.spawn(player::LocallyControlled).id();
 	
 	cmds.spawn(Camera3dBundle {
 		transform: Transform::from_xyz(0., 0., 0.)
 			.looking_at(Vec3::ZERO, Vec3::Y),
 		..default()
-	}).set_parent(id);	
+	}).set_parent(id);
 	
 	spawn_events.send(player::SpawnEvent {
 		rt_vessel_data: player_data.clone(),

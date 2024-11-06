@@ -16,9 +16,10 @@ impl Plugin for MultiplayerPlugin {
 			.replicate_group::<(MultiPlayer, Transform)>()
 			.add_client_event::<PlayerControl>(ChannelKind::Ordered)
 			
-			.add_systems(Update, mark_players)
+			.add_systems(Update, mark_players.after(worldplay::player::move_player))
 			.add_systems(Update, apply_client_movement
 				.after(worldplay::player::spawn_players)
+				.before(worldplay::player::move_player)
 				.run_if(server_running)
 			)
 			.add_systems(PreUpdate,
@@ -47,7 +48,7 @@ pub struct MultiPlayer;
 
 
 pub fn send_movement(
-	query: Query<&PlayerControl, Changed<PlayerControl>>,
+	query: Query<&PlayerControl, (With<worldplay::player::LocallyControlled>, Changed<PlayerControl>)>,
 	mut events: EventWriter<PlayerControl>,
 ) {
 	if let Some(control) = query.iter().next() {
@@ -102,10 +103,24 @@ pub fn setup_player(
 }
 
 pub fn mark_players(
-	query: Query<&Transform, With<MultiPlayer>>,
+	query: Query<(
+		&Transform,
+		Option<&PlayerControl>,
+		Option<&avian3d::prelude::ExternalForce>
+		),
+		With<MultiPlayer>
+	>,
 	mut gizmos: Gizmos,
 ) {
-	for tf in &query {
+	for (tf, maybe_control, maybe_force) in &query {
 		gizmos.sphere(tf.translation, tf.rotation, 0.5, css::WHITE);
+		if let Some(control) = maybe_control {
+			let offset =  control.0.extend(0.).xzy()*2.;
+			gizmos.line(tf.translation, tf.translation + tf.rotation * offset, css::BLUE);
+		}
+		if let Some(force) = maybe_force {
+			let offset = force.force() * 10.;
+			gizmos.line(tf.translation, tf.translation + offset, css::RED);
+		}
 	}
 }

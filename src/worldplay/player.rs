@@ -143,13 +143,18 @@ pub fn camera_ui(
 }
 
 
-#[derive(Event, Clone, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Event, Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 pub struct Control(pub Vec2);
+
+
+///A player thats is controlled by this client
+#[derive(Component, Clone, Copy)]
+pub struct LocallyControlled;
 
 
 pub fn read_player_input(
 	buttons: Res<ButtonInput<KeyCode>>,
-	mut players: Query<&mut Control>,
+	mut players: Query<&mut Control, With<LocallyControlled>>,
 ) {
 	let mut move_dir = Vec2::ZERO;
 
@@ -188,8 +193,11 @@ pub fn move_player(
 ) {
 	for (control, vessel, tf, mut force, mut torque, vel, rot_vel,) in &mut players {
 		let control = control.0;
-		force.persistent = false;
-		torque.persistent = false;
+		
+		force.persistent = true;
+		force.clear();
+		torque.persistent = true;
+		torque.clear();
 		
 		// extra frictions
 		
