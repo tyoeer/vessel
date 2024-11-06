@@ -58,11 +58,12 @@ pub fn spawn_player(
 	player_data: Res<RtVesselData>,
 ) {
 	let player = cmds.spawn(player_data.vessel_info.clone())
-	.insert(SpatialBundle::default())
-	.insert(RigidBody::Dynamic)
-	.insert(Collider::cuboid(1., 1., 1.))
-	.set_parent(root.0)
-	.id();
+		.insert(Control::default())
+		.insert(SpatialBundle::default())
+		.insert(RigidBody::Dynamic)
+		.insert(Collider::cuboid(1., 1., 1.))
+		.set_parent(root.0)
+		.id();
 	
 	for graphic in &player_data.graphics {
 		cmds.spawn(PbrBundle {
@@ -129,12 +130,16 @@ pub fn camera_ui(
 }
 
 
-pub fn move_player(
-	mut players: Query<(&VesselProperties, &Transform, &mut ExternalForce, &mut ExternalTorque, &LinearVelocity, &AngularVelocity)>,
+#[derive(Component, Default)]
+pub struct Control(pub Vec2);
+
+
+pub fn read_player_input(
 	buttons: Res<ButtonInput<KeyCode>>,
+	mut players: Query<&mut Control>,
 ) {
 	let mut move_dir = Vec2::ZERO;
-	
+
 	if buttons.pressed(KeyCode::KeyW) {
 		move_dir += Vec2::Y;
 	}
@@ -148,7 +153,25 @@ pub fn move_player(
 		move_dir -= Vec2::X;
 	}
 	
-	for (vessel, tf, mut force, mut torque, vel, rot_vel,) in &mut players {
+	for mut control in &mut players {
+		control.0 = move_dir;
+	}
+}
+
+
+pub fn move_player(
+	mut players: Query<(
+		&Control,
+		&VesselProperties,
+		&Transform,
+		&mut ExternalForce,
+		&mut ExternalTorque,
+		&LinearVelocity,
+		&AngularVelocity
+	)>,
+) {
+	for (control, vessel, tf, mut force, mut torque, vel, rot_vel,) in &mut players {
+		let control = control.0;
 		force.persistent = false;
 		torque.persistent = false;
 		
@@ -169,10 +192,10 @@ pub fn move_player(
 		let accel_dir_world_space = tf.rotation.mul_vec3(Vec3::X);
 		//Remove flying capabilities
 		let accel_dir_world_space = accel_dir_world_space.with_y(0.).normalize();
-		let accel_force = vessel.control_forwards_force * move_dir.y;
+		let accel_force = vessel.control_forwards_force * control.y;
 		
 		force.apply_force(accel_dir_world_space * accel_force);
 		
-		torque.apply_torque(Quat::from_rotation_y(move_dir.x * -vessel.control_torque).to_scaled_axis());
+		torque.apply_torque(Quat::from_rotation_y(control.x * -vessel.control_torque).to_scaled_axis());
 	}
 }

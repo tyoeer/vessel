@@ -29,6 +29,7 @@ impl<State: States> Plugin for GameplayPlugin<State> {
 			cleanup_root,
 		));
 		app.add_systems(Update, (
+				player::read_player_input.before(player::move_player),
 				player::move_player,
 				player::update_camera,
 				player::camera_ui,
