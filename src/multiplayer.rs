@@ -29,6 +29,7 @@ impl Plugin for MultiplayerPlugin {
 			.add_systems(PreUpdate,
 				(
 					spawn_player,
+					connection_handler,
 				)
 				.after(ServerSet::Receive)
 				.run_if(server_running)
@@ -117,6 +118,29 @@ pub fn spawn_player(
 		client_owned_entities.map.insert(event.client_id, id);
 	}
 }
+
+
+pub fn connection_handler(
+	mut events: EventReader<ServerEvent>,
+	mut cmds: Commands,
+	mut client_owned_entities: ResMut<ClientOwnedEntities>,
+) {
+	for event in events.read() {
+		match event {
+			ServerEvent::ClientConnected { client_id } => {
+				info!(?client_id, "client connected");
+			},
+			ServerEvent::ClientDisconnected { client_id, reason } => {
+				info!(?client_id, reason, "client disconnected");
+				let maybe_entity = client_owned_entities.map.remove(client_id);
+				if let Some(entity) = maybe_entity {
+					cmds.entity(entity).despawn_recursive();
+				}
+			}
+		}
+	}
+}
+
 
 pub fn setup_player(
 	todo: Query<Entity, (With<MultiPlayer>, Without<GlobalTransform>)>,
