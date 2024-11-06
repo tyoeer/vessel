@@ -19,16 +19,18 @@ pub struct GameplayPlugin<State: States> {
 impl<State: States> Plugin for GameplayPlugin<State> {
 	fn build(&self, app: &mut App) {
 		app.init_resource::<player::CameraSettings>();
+		app.add_event::<player::SpawnEvent>();
 		app.add_systems(OnEnter(self.state.clone()), (
 			create_root,
 			(
-				player::spawn_player,
+				spawn_player,
 			).after(create_root)
 		));
 		app.add_systems(OnExit(self.state.clone()), (
 			cleanup_root,
 		));
 		app.add_systems(Update, (
+				player::spawn_players,
 				player::read_player_input.before(player::move_player),
 				player::move_player,
 				player::update_camera,
@@ -37,6 +39,16 @@ impl<State: States> Plugin for GameplayPlugin<State> {
 			.run_if(in_state(self.state.clone()))
 		);
 	}
+}
+
+
+pub fn spawn_player(
+	player_data: Res<player::RtVesselData>,
+	mut spawn_events: EventWriter<player::SpawnEvent>,
+) {
+	spawn_events.send(player::SpawnEvent {
+		rt_vessel_data: player_data.clone(),
+	});
 }
 
 

@@ -3,13 +3,14 @@ use bevy::prelude::*;
 use super::*;
 
 
-#[derive(Resource)]
+#[derive(Resource, Clone)]
 pub struct RtVesselData {
 	pub vessel_info: VesselProperties,
 	pub graphics: Vec<VesselGraphicPart>,
 }
 
 
+#[derive(Clone)]
 pub struct VesselGraphicPart {
 	pub mesh: Handle<Mesh>,
 	pub material: Handle<StandardMaterial>,
@@ -52,33 +53,42 @@ impl Default for CameraSettings {
 }
 
 
-pub fn spawn_player(
+#[derive(Event)]
+pub struct SpawnEvent {
+	pub rt_vessel_data: RtVesselData,
+}
+
+
+pub fn spawn_players(
 	mut cmds: Commands,
 	root: Res<GameplayRoot>,
-	player_data: Res<RtVesselData>,
+	mut spawn_events: EventReader<SpawnEvent>,
 ) {
-	let player = cmds.spawn(player_data.vessel_info.clone())
-		.insert(Control::default())
-		.insert(SpatialBundle::default())
-		.insert(RigidBody::Dynamic)
-		.insert(Collider::cuboid(1., 1., 1.))
-		.set_parent(root.0)
-		.id();
-	
-	for graphic in &player_data.graphics {
-		cmds.spawn(PbrBundle {
-			mesh: graphic.mesh.clone(),
-			material: graphic.material.clone(),
-			transform: graphic.transform,
+	for event in spawn_events.read() {
+		let player_data = &event.rt_vessel_data;
+		let player = cmds.spawn(player_data.vessel_info.clone())
+			.insert(Control::default())
+			.insert(SpatialBundle::default())
+			.insert(RigidBody::Dynamic)
+			.insert(Collider::cuboid(1., 1., 1.))
+			.set_parent(root.0)
+			.id();
+		
+		for graphic in &player_data.graphics {
+			cmds.spawn(PbrBundle {
+				mesh: graphic.mesh.clone(),
+				material: graphic.material.clone(),
+				transform: graphic.transform,
+				..default()
+			}).set_parent(player);
+		}
+		
+		cmds.spawn(Camera3dBundle {
+			transform: Transform::from_xyz(0., 0., 0.)
+				.looking_at(Vec3::ZERO, Vec3::Y),
 			..default()
 		}).set_parent(player);
 	}
-	
-	cmds.spawn(Camera3dBundle {
-		transform: Transform::from_xyz(0., 0., 0.)
-			.looking_at(Vec3::ZERO, Vec3::Y),
-		..default()
-	}).set_parent(player);
 }
 
 
