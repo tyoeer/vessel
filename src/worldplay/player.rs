@@ -130,7 +130,7 @@ pub fn camera_ui(
 }
 
 
-#[derive(Component, Default)]
+#[derive(Event, Clone, Default, serde::Serialize, serde::Deserialize)]
 pub struct Control(pub Vec2);
 
 
@@ -154,7 +154,10 @@ pub fn read_player_input(
 	}
 	
 	for mut control in &mut players {
-		control.0 = move_dir;
+		let old = control.bypass_change_detection().0;
+		if move_dir != old {
+			control.0 = move_dir;
+		}
 	}
 }
 
