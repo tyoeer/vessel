@@ -64,6 +64,7 @@ pub fn spawn_vessels(
 			.insert(Control::default())
 			.insert(SpatialBundle::default())
 			.insert(RigidBody::Dynamic)
+			.insert(Friction::new(0.)) // extra friction is provided by the race track itself
 			.insert(Collider::cuboid(1., 1., 1.))
 			.set_parent(root.0)
 			.id();

@@ -1,4 +1,4 @@
-use avian3d::{prelude::Physics, PhysicsPlugins};
+use avian3d::{prelude::{Gravity, Physics}, PhysicsPlugins};
 use bevy::{input::mouse::{MouseButtonInput, MouseWheel}, prelude::*};
 use bevy_mod_picking::debug::DebugPickingMode;
 
@@ -27,6 +27,7 @@ fn main() {
 	//Fix physics slowing down when the window is unfocussed
 	// see also https://github.com/Jondolf/avian/pull/457
 	.insert_resource(Time::new_with(Physics::variable(1.)))
+	.insert_resource(Gravity(-Vec3::Y * 15.))
 	
 	.add_plugins((
 		bevy_replicon::RepliconPlugins,
