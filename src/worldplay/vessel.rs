@@ -4,7 +4,7 @@ use super::*;
 
 
 ///Everything required for a vessel at runtime
-#[derive(Resource, Clone)]
+#[derive(Resource, Clone, Default)]
 pub struct RtVesselData {
 	pub vessel_info: VesselProperties,
 	pub graphics: Vec<VesselGraphicPart>,
@@ -35,6 +35,17 @@ pub struct VesselProperties {
 	
 }
 
+impl Default for VesselProperties {
+	fn default() -> Self {
+		Self {
+			control_forwards_force: 8.,
+			control_torque: 6.,
+			side_friction: 2.2,
+			rotary_friction_hor: 3.,
+			rotary_friction_ver: 6.,
+		}
+	}
+}
 
 
 

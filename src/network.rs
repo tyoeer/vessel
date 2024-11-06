@@ -55,6 +55,16 @@ pub fn network_ui(
 }
 
 
+/// A bevy system to start running the server. Used in the headless/dedicated server.
+pub fn setup_server_system(
+	mut cmds: Commands,
+	channels: Res<RepliconChannels>,
+) {
+	info!("starting server...");
+	setup_server(&mut cmds, &channels);
+}
+
+
 const PORT: u16 = 25565; //yoink
 const PROTOCOL_ID: u64 = 0; //it's what the example does 🤷
 

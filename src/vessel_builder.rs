@@ -50,13 +50,7 @@ pub fn build_vessel(
 	}
 	
 	RtVesselData {
-		vessel_info: VesselProperties {
-			control_forwards_force: 8.,
-			control_torque: 6.,
-			side_friction: 2.2,
-			rotary_friction_hor: 3.,
-			rotary_friction_ver: 6.,
-		},
+		vessel_info: VesselProperties::default(),
 		graphics,
 	}
 }

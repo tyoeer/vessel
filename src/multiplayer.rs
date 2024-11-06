@@ -19,8 +19,12 @@ impl Plugin for MultiplayerPlugin {
 			.add_client_event::<NewUserVessel>(ChannelKind::Unordered)
 			
 			.add_systems(OnEnter(crate::GameState::WorldPlay), send_user_vessel.after(user::spawn_user).run_if(client_connected))
-			
-			.add_systems(Update, mark_players.after(vessel::move_vessel))
+		;
+		
+		#[cfg(feature="user_interface")]
+		app.add_systems(Update, mark_players.after(vessel::move_vessel));
+		
+		app
 			.add_systems(Update, apply_client_movement
 				.after(vessel::spawn_vessels)
 				.before(vessel::move_vessel)

@@ -1,7 +1,5 @@
 use avian3d::{prelude::{Gravity, Physics}, PhysicsPlugins};
 use bevy::{input::mouse::{MouseButtonInput, MouseWheel}, prelude::*};
-use bevy_mod_picking::debug::DebugPickingMode;
-
 
 mod editor;
 mod worldplay;
@@ -11,17 +9,48 @@ mod multiplayer;
 
 
 fn main() {
-	App::new()
+	let mut app = App::new();
 	
-	// Init
-	.add_plugins(DefaultPlugins.set(WindowPlugin {
+	#[cfg(feature="user_interface")]
+	app.add_plugins(DefaultPlugins.set(WindowPlugin {
 		primary_window: Some(Window {
 			//gets rid of input lag
 			present_mode: bevy::window::PresentMode::AutoNoVsync,
 			..default()
 		}),
 		..default()
-	}))
+	}));
+	
+	#[cfg(not(feature="user_interface"))]
+	// plugin list copied from https://github.com/bevyengine/bevy/blob/a967c75e92aa08704f11459e4597f6a24bc476c3/crates/bevy_internal/src/default_plugins.rs#L81-L106
+	// to replace when bevy 0.15 hits
+	app.add_plugins((
+		bevy::app::PanicHandlerPlugin,
+		bevy::log::LogPlugin::default(),
+		bevy::core::TaskPoolPlugin::default(),
+		bevy::core::TypeRegistrationPlugin,
+		bevy::core::FrameCountPlugin,
+		bevy::time::TimePlugin,
+		bevy::transform::TransformPlugin,
+		bevy::hierarchy::HierarchyPlugin,
+		bevy::diagnostic::DiagnosticsPlugin,
+		bevy::app::ScheduleRunnerPlugin::default(),
+		bevy::asset::AssetPlugin::default(),
+		bevy::scene::ScenePlugin,
+		bevy::animation::AnimationPlugin,
+		bevy::state::app::StatesPlugin,
+		bevy::gltf::GltfPlugin::default(), // used to load the track collider
+	));
+	#[cfg(not(feature="user_interface"))]
+	app.init_asset::<Mesh>() //required by avian3d to create a collider from a mesh
+		.init_asset::<bevy::pbr::StandardMaterial>() //required by the gltf loader I think?
+		.register_type::<bevy::render::view::visibility::Visibility>() // required to spawn the track scene
+		.register_type::<bevy::render::view::visibility::InheritedVisibility>() // required to spawn the track scene
+		.register_type::<bevy::render::view::visibility::ViewVisibility>() // required to spawn the track scene
+		.register_type::<bevy::render::primitives::Aabb>() // required to spawn the track scene
+	;
+	
+	app
 	
 	.add_plugins(PhysicsPlugins::default())
 	//Fix physics slowing down when the window is unfocussed
@@ -34,35 +63,51 @@ fn main() {
 		bevy_replicon_renet::RepliconRenetPlugins,
 		multiplayer::MultiplayerPlugin,
 	))
-	.add_systems(Update, network::network_ui)
+	;
+
+	#[cfg(feature="user_interface")]
+	app.add_plugins(bevy_egui::EguiPlugin)
+		.add_systems(
+			PreUpdate,
+			absorb_egui_inputs
+			.after(bevy_egui::systems::process_input_system)
+			.before(bevy_egui::EguiSet::BeginPass)
+		);
 	
-	.add_plugins(bevy_egui::EguiPlugin)
-	.add_systems(
-		PreUpdate,
-		absorb_egui_inputs
-		.after(bevy_egui::systems::process_input_system)
-		.before(bevy_egui::EguiSet::BeginPass)
-	)
-	.add_plugins(bevy_mod_picking::DefaultPickingPlugins)
-	.insert_resource(DebugPickingMode::Normal)
+	#[cfg(feature="user_interface")]
+	app.add_plugins(bevy_mod_picking::DefaultPickingPlugins)
+		.insert_resource(bevy_mod_picking::debug::DebugPickingMode::Normal);
 	
-	.insert_state(GameState::EditVessel)
-	.add_plugins(editor::EditorPlugin {
+	#[cfg(not(feature="user_interface"))]
+	app.insert_state(GameState::WorldPlay)
+		.add_systems(Startup, network::setup_server_system);
+	#[cfg(feature="user_interface")]
+	app.insert_state(GameState::EditVessel)
+		//TODO redesign catalogue so a headless server can use it
+		.add_systems(Startup, editor::setup_catalogue)
+		.add_systems(Startup, setup_ui_style)
+		.add_systems(Update, state_ui)
+		.add_systems(Update, network::network_ui);
+
+	// needed for the server
+	
+	#[cfg(feature="user_interface")]
+	app.add_plugins(editor::EditorPlugin {
 		state: GameState::EditVessel
-	})
+	});
+	
+	app
 	.add_plugins(worldplay::GameplayPlugin {
 		state: GameState::WorldPlay
 	})
-	
+	.init_resource::<worldplay::vessel::RtVesselData>()
+
 	.add_systems(OnTransition {
 		exited: GameState::EditVessel,
 		entered: GameState::WorldPlay
 	}, vessel_builder::build_vessel_system)
 	
-	.add_systems(Startup, setup_ui_style)
 	.add_systems(Startup, setup_demo_track)
-	.add_systems(Startup, editor::setup_catalogue)
-	.add_systems(Update, state_ui)
 	
 	.run();
 }

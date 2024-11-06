@@ -31,9 +31,11 @@ impl<State: States> Plugin for GameplayPlugin<State> {
 		));
 		app.add_systems(Update, (
 				vessel::spawn_vessels.before(avian3d::prelude::PhysicsSet::Prepare),
+				#[cfg(feature="user_interface")]
 				user::read_user_input.before(vessel::move_vessel),
 				vessel::move_vessel.before(avian3d::prelude::PhysicsSet::StepSimulation),
 				user::update_camera,
+				#[cfg(feature="user_interface")]
 				user::camera_ui,
 			)
 			.run_if(in_state(self.state.clone()))
