@@ -17,10 +17,13 @@ impl Plugin for MultiplayerPlugin {
 			.add_client_event::<PlayerControl>(ChannelKind::Ordered)
 			
 			.add_systems(Update, mark_players)
+			.add_systems(Update, apply_client_movement
+				.after(worldplay::player::spawn_players)
+				.run_if(server_running)
+			)
 			.add_systems(PreUpdate,
 				(
 					spawn_player,
-					apply_client_movement,
 				)
 				.after(ServerSet::Receive)
 				.run_if(server_running)
@@ -69,15 +72,19 @@ pub fn spawn_player(
 	mut cmds: Commands,
 	mut ev: EventReader<ServerEvent>,
 	mut client_entities: ResMut<ClientEntities>,
+	rt_vessel_data: Res<worldplay::player::RtVesselData>,
+	mut spawn_events: EventWriter<worldplay::player::SpawnEvent>,
 ) {
 	for event in ev.read() {
 		if let ServerEvent::ClientConnected { client_id } = event {
 			let id = cmds.spawn(MultiPlayer)
-				.insert(SpatialBundle::default())
-				.insert(PlayerControl::default())
 				.insert(Replicated)
 				.id();
 			client_entities.map.insert(*client_id, id);
+			spawn_events.send(worldplay::player::SpawnEvent {
+				rt_vessel_data: rt_vessel_data.clone(),
+				player_entity: Some(id),
+			});
 		}
 	}
 }

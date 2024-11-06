@@ -43,11 +43,21 @@ impl<State: States> Plugin for GameplayPlugin<State> {
 
 
 pub fn spawn_player(
+	mut cmds: Commands,
 	player_data: Res<player::RtVesselData>,
 	mut spawn_events: EventWriter<player::SpawnEvent>,
 ) {
+	let id = cmds.spawn_empty().id();
+	
+	cmds.spawn(Camera3dBundle {
+		transform: Transform::from_xyz(0., 0., 0.)
+			.looking_at(Vec3::ZERO, Vec3::Y),
+		..default()
+	}).set_parent(id);	
+	
 	spawn_events.send(player::SpawnEvent {
 		rt_vessel_data: player_data.clone(),
+		player_entity: Some(id),
 	});
 }
 

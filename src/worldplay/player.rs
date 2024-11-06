@@ -56,6 +56,8 @@ impl Default for CameraSettings {
 #[derive(Event)]
 pub struct SpawnEvent {
 	pub rt_vessel_data: RtVesselData,
+	///Already existing entity to spawn the player into, used for multiplayer
+	pub player_entity: Option<Entity>,
 }
 
 
@@ -66,7 +68,14 @@ pub fn spawn_players(
 ) {
 	for event in spawn_events.read() {
 		let player_data = &event.rt_vessel_data;
-		let player = cmds.spawn(player_data.vessel_info.clone())
+		
+		let mut player_cmds = match event.player_entity {
+			None => cmds.spawn_empty(),
+			Some(entity) => cmds.entity(entity),
+		};
+		
+		let player = player_cmds
+			.insert(player_data.vessel_info.clone())
 			.insert(Control::default())
 			.insert(SpatialBundle::default())
 			.insert(RigidBody::Dynamic)
@@ -82,12 +91,6 @@ pub fn spawn_players(
 				..default()
 			}).set_parent(player);
 		}
-		
-		cmds.spawn(Camera3dBundle {
-			transform: Transform::from_xyz(0., 0., 0.)
-				.looking_at(Vec3::ZERO, Vec3::Y),
-			..default()
-		}).set_parent(player);
 	}
 }
 
