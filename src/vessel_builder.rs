@@ -16,7 +16,7 @@ use bevy::prelude::{
 };
 
 use crate::{
-	editor::misc::EditorVesselData,
+	editor::misc::CreationData,
 	worldplay::vessel::{
 		RtVesselData,
 		VesselGraphicPart,
@@ -26,7 +26,7 @@ use crate::{
 
 
 pub fn build_vessel_system(
-	sv: Res<EditorVesselData>,
+	sv: Res<CreationData>,
 	mut cmds: Commands,
 ) {
 	cmds.insert_resource(build_vessel(&sv));
@@ -34,7 +34,7 @@ pub fn build_vessel_system(
 
 
 pub fn build_vessel(
-	sv: &EditorVesselData,
+	sv: &CreationData,
 ) -> RtVesselData {
 	let mut graphics = Vec::new();
 	

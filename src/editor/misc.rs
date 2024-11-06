@@ -4,11 +4,11 @@ use super::*;
 
 
 #[derive(Resource)]
-pub struct EditorVesselData {
+pub struct CreationData {
 	pub objects: Vec<object::Object>,
 }
 
-impl EditorVesselData {
+impl CreationData {
 	pub fn new() -> Self {
 		Self {
 			objects: Vec::new(),
@@ -17,10 +17,10 @@ impl EditorVesselData {
 }
 
 pub fn store_objects(
-	q: Query<(&VesselPos, &object::ElementComponent)>,
+	q: Query<(&object::Pos, &object::ElementComponent)>,
 	mut cmds: Commands,
 ) {
-	let mut sv = EditorVesselData::new();
+	let mut sv = CreationData::new();
 	
 	for (pos, elemc) in &q {
 		sv.objects.push(object::Object {

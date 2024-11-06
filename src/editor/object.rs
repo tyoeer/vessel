@@ -1,7 +1,7 @@
 /*!
 Everything to do with objects and elements.
 
-A vessel consists of objects that are placed by the user.
+A creation consists of objects that are placed by the user.
 THe type of an object is it's element.
 */
 
@@ -11,13 +11,18 @@ use bevy::prelude::*;
 use bevy_mod_picking::PickableBundle;
 use derive_more::derive::{From, Into};
 
-use super::{EditorRoot, VesselPos};
+use super::EditorRoot;
+
+
+///Position of an object within a creation
+#[derive(Component, Clone, From, Into)]
+pub struct Pos(pub IVec3);
 
 
 ///Object info separate from ECS
 pub struct Object {
 	pub element: ElemRef,
-	pub pos: VesselPos,
+	pub pos: Pos,
 }
 
 
@@ -69,7 +74,7 @@ pub fn create_event_handler(
 			..default()
 		})
 		.set_parent(root.0)
-		.insert(VesselPos::from(object_pos))
+		.insert(Pos::from(object_pos))
 		.insert(ElementComponent::from(element.clone()))
 		.insert(PickableBundle::default());
 	}
@@ -78,14 +83,13 @@ pub fn create_event_handler(
 
 pub mod event {
 	use bevy::prelude::*;
-	use super::super::VesselPos;
 	use super::*;
 	
 	
 	///CReates a new object
 	#[derive(Event)]
 	pub struct Create {
-		pub pos: VesselPos,
+		pub pos: Pos,
 		pub element: ElemRef,
 	}
 }

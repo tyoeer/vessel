@@ -46,7 +46,7 @@ fn main() {
 	.insert_resource(DebugPickingMode::Normal)
 	
 	.insert_state(GameState::EditVessel)
-	.add_plugins(editor::VesselPlugin {
+	.add_plugins(editor::EditorPlugin {
 		state: GameState::EditVessel
 	})
 	.add_plugins(worldplay::GameplayPlugin {

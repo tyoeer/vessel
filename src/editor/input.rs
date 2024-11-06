@@ -75,7 +75,7 @@ pub fn move_camera(
 
 pub fn click_handler(
 	mut clicks: EventReader<Pointer<Click>>,
-	pos: Query<&VesselPos>,
+	pos: Query<&object::Pos>,
 	mut create: EventWriter<object::event::Create>,
 	selem: Res<Hand>,
 ) {

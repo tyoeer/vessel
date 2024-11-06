@@ -1,7 +1,7 @@
 /*!
-Everything related to editing vessels.
+Everything related to the creation editor.
 
-"Vessel" is the catch-all term for whatever you can make in the editor
+"Creation" is the catch-all term for whatever you can make in the editor
 
 Coordinate system:
 - X+ is forwards
@@ -25,11 +25,11 @@ pub mod misc;
 
 
 
-pub struct VesselPlugin<State: States> {
+pub struct EditorPlugin<State: States> {
 	pub state: State,
 }
 
-impl<State: States> Plugin for VesselPlugin<State> {
+impl<State: States> Plugin for EditorPlugin<State> {
 	fn build(&self, app: &mut App) {
 		app
 			.add_event::<object::event::Create>()
@@ -111,9 +111,7 @@ pub struct EditorRoot(pub Entity);
 #[derive(Resource)]
 pub struct Hand(pub object::ElemRef);
 
-///Position of an object within a vessel
-#[derive(Component, Clone, From, Into)]
-pub struct VesselPos(pub IVec3);
+
 
 
 fn create_root(
