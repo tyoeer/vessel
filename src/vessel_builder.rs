@@ -17,7 +17,7 @@ use bevy::prelude::{
 
 use crate::{
 	editor::misc::EditorVesselData,
-	worldplay::player::{
+	worldplay::vessel::{
 		RtVesselData,
 		VesselGraphicPart,
 		VesselProperties,

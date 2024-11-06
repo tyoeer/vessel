@@ -3,8 +3,10 @@ use std::collections::HashMap;
 use bevy::{color::palettes::css, prelude::*};
 use bevy_replicon::prelude::*;
 use serde::{Serialize, Deserialize};
-use crate::worldplay;
-use worldplay::player::Control as PlayerControl;
+use crate::worldplay::{
+	self,
+	vessel,
+};
 
 pub struct MultiplayerPlugin;
 
@@ -14,12 +16,12 @@ impl Plugin for MultiplayerPlugin {
 			.init_resource::<ClientEntities>()
 			
 			.replicate_group::<(MultiPlayer, Transform)>()
-			.add_client_event::<PlayerControl>(ChannelKind::Ordered)
+			.add_client_event::<vessel::Control>(ChannelKind::Ordered)
 			
-			.add_systems(Update, mark_players.after(worldplay::player::move_player))
+			.add_systems(Update, mark_players.after(vessel::move_vessel))
 			.add_systems(Update, apply_client_movement
-				.after(worldplay::player::spawn_players)
-				.before(worldplay::player::move_player)
+				.after(vessel::spawn_vessels)
+				.before(vessel::move_vessel)
 				.run_if(server_running)
 			)
 			.add_systems(PreUpdate,
@@ -48,8 +50,8 @@ pub struct MultiPlayer;
 
 
 pub fn send_movement(
-	query: Query<&PlayerControl, (With<worldplay::player::LocallyControlled>, Changed<PlayerControl>)>,
-	mut events: EventWriter<PlayerControl>,
+	query: Query<&vessel::Control, (With<worldplay::user::LocallyControlled>, Changed<vessel::Control>)>,
+	mut events: EventWriter<vessel::Control>,
 ) {
 	if let Some(control) = query.iter().next() {
 		events.send(control.clone());
@@ -57,8 +59,8 @@ pub fn send_movement(
 }
 
 pub fn apply_client_movement(
-	mut query: Query<&mut PlayerControl>,
-	mut events: EventReader<FromClient<PlayerControl>>,
+	mut query: Query<&mut vessel::Control>,
+	mut events: EventReader<FromClient<vessel::Control>>,
 	client_entities: Res<ClientEntities>,
 ) {
 	for event in events.read() {
@@ -73,8 +75,8 @@ pub fn spawn_player(
 	mut cmds: Commands,
 	mut ev: EventReader<ServerEvent>,
 	mut client_entities: ResMut<ClientEntities>,
-	rt_vessel_data: Res<worldplay::player::RtVesselData>,
-	mut spawn_events: EventWriter<worldplay::player::SpawnEvent>,
+	rt_vessel_data: Res<vessel::RtVesselData>,
+	mut spawn_events: EventWriter<vessel::SpawnEvent>,
 ) {
 	for event in ev.read() {
 		if let ServerEvent::ClientConnected { client_id } = event {
@@ -82,7 +84,7 @@ pub fn spawn_player(
 				.insert(Replicated)
 				.id();
 			client_entities.map.insert(*client_id, id);
-			spawn_events.send(worldplay::player::SpawnEvent {
+			spawn_events.send(vessel::SpawnEvent {
 				rt_vessel_data: rt_vessel_data.clone(),
 				player_entity: Some(id),
 			});
@@ -105,7 +107,7 @@ pub fn setup_player(
 pub fn mark_players(
 	query: Query<(
 		&Transform,
-		Option<&PlayerControl>,
+		Option<&vessel::Control>,
 		Option<&avian3d::prelude::ExternalForce>
 		),
 		With<MultiPlayer>
