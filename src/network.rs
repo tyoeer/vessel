@@ -12,10 +12,11 @@ use bevy_replicon_renet::{
 };
 
 use std::{
-	time::SystemTime,
 	net::{
 		IpAddr, Ipv4Addr, SocketAddr, UdpSocket,
-	}
+	},
+	str::FromStr as _,
+	time::SystemTime,
 };
 
 
@@ -26,6 +27,8 @@ pub fn network_ui(
 	client: Res<RepliconClient>,
 	server: Res<RepliconServer>,
 	connected_clients: Res<ConnectedClients>,
+	mut ip_input: Local<String>,
+	mut ip_input_err: Local<Option<String>>,
 ) {
 	use bevy_egui::egui;
 	let Some(ctx) = contexts.try_ctx_mut() else {
@@ -33,7 +36,7 @@ pub fn network_ui(
 		// This system can still run in those conditions, so just do nothing until other systems fix it
 		return;
 	};
-
+	
 	egui::Window::new("Network").resizable(true).show(ctx, |ui| {
 		ui.label(format!("Client status: {:?}", client.status()));
 		ui.label(format!("Server running: {}", server.is_running()));
@@ -44,8 +47,26 @@ pub fn network_ui(
 		} 
 		
 		if !server.is_running() && client.is_disconnected() {
+			let mut input_res = ui.text_edit_singleline(&mut *ip_input);
+			if !input_res.has_focus() && ip_input.is_empty() {
+				ip_input.push_str("127.0.0.1");
+				input_res.mark_changed();
+			}
+			if input_res.changed() {
+				if let Err(err) = IpAddr::from_str(&ip_input) {
+					*ip_input_err = Some(err.to_string());
+				} else {
+					*ip_input_err = None;
+				}
+			}
+			if let Some(ref err) = *ip_input_err {
+				ui.colored_label(egui::Color32::RED, err);
+			}
+			
 			if ui.button("Connect as client to localhost").clicked() {
-				setup_client(&mut cmds, &channels, Ipv4Addr::LOCALHOST.into());
+				if let Ok(ip) = IpAddr::from_str(&ip_input) {
+					setup_client(&mut cmds, &channels, ip);
+				}
 			}
 			if ui.button("Run server").clicked() {
 				setup_server(&mut cmds, &channels);
