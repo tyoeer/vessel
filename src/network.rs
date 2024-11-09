@@ -63,7 +63,7 @@ pub fn network_ui(
 				ui.colored_label(egui::Color32::RED, err);
 			}
 			
-			if ui.button("Connect as client to localhost").clicked() {
+			if ui.button("Connect as client").clicked() {
 				if let Ok(ip) = IpAddr::from_str(&ip_input) {
 					setup_client(&mut cmds, &channels, ip);
 				}
