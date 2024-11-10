@@ -16,13 +16,16 @@ opt-level = 3
 
 
 [features]
-default = ["user_interface", "bevy/dynamic_linking"]
+default = [ "user_interface", "develop" ]
+
 # without user_interface it's a headless dedicated server
 user_interface = [
 	# "bevy_egui",
 	# "bevy/default"
 ]
 
+# for things that help during development, but should be disbaled on release/distribution
+develop = [ "bevy/dynamic_linking" ]
 
 
 [dependencies]
