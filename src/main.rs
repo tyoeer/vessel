@@ -133,8 +133,10 @@ fn setup_demo_track(
 		..default()
 	})
 	.insert(ColliderConstructorHierarchy::new(ColliderConstructor::TrimeshFromMeshWithConfig(
-		TrimeshFlags::MERGE_DUPLICATE_VERTICES | TrimeshFlags::DELETE_DEGENERATE_TRIANGLES
-		| TrimeshFlags::DELETE_DUPLICATE_TRIANGLES | TrimeshFlags::FIX_INTERNAL_EDGES
+		TrimeshFlags::MERGE_DUPLICATE_VERTICES
+		| TrimeshFlags::DELETE_DUPLICATE_TRIANGLES 
+		| TrimeshFlags::DELETE_DEGENERATE_TRIANGLES
+		| TrimeshFlags::FIX_INTERNAL_EDGES
 		| TrimeshFlags::DELETE_BAD_TOPOLOGY_TRIANGLES
 	)))
 	.insert(RigidBody::Static);
