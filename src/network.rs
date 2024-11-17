@@ -98,19 +98,19 @@ pub fn setup_server(
 	let client_channels_config = channels.get_client_configs();
 
 	let server = RenetServer::new(ConnectionConfig {
-					server_channels_config,
-					client_channels_config,
-					..Default::default()
+		server_channels_config,
+		client_channels_config,
+		..Default::default()
 	});
 
 	let current_time = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).expect("system time should be after the unix epoch");
 	let socket = UdpSocket::bind((Ipv4Addr::UNSPECIFIED, PORT)).unwrap();
 	let server_config = ServerConfig {
-					current_time,
-					max_clients: 10,
-					protocol_id: PROTOCOL_ID,
-					authentication: ServerAuthentication::Unsecure,
-					public_addresses: Default::default(),
+		current_time,
+		max_clients: 10,
+		protocol_id: PROTOCOL_ID,
+		authentication: ServerAuthentication::Unsecure,
+		public_addresses: Default::default(),
 	};
 	let transport = NetcodeServerTransport::new(server_config, socket).unwrap();
 
