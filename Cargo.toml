@@ -54,6 +54,7 @@ default-features = false
 features = [
 	"render",
 	"default_fonts",
+	"manage_clipboard",
 ]
 
 [dependencies.bevy]
