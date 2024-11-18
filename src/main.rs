@@ -139,6 +139,7 @@ fn setup_demo_track(
 		| TrimeshFlags::FIX_INTERNAL_EDGES
 		| TrimeshFlags::DELETE_BAD_TOPOLOGY_TRIANGLES
 	)))
+	.insert(CollisionMargin(0.002)) // should help with stability around trimeshes
 	.insert(RigidBody::Static);
 }
 
