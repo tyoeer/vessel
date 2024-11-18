@@ -15,27 +15,24 @@ use bevy::{asset::Assets, math::{Quat, Vec3}, prelude::{
 }};
 
 use crate::{
-	editor::{
-		misc::CreationData,
-		object::Catalogue,
-	},
-	worldplay::{user::UserVesselId, vessel::{
-		RtVesselData, SimVessel, VesselGraphicPart, VesselProperties
-	}}
+	editor::misc::CreationData,
+	worldplay::{
+		user::UserVesselId,
+		vessel::{
+			SimVessel, VesselProperties
+		}
+	}
 };
 
 
 pub fn build_vessel_system(
 	creation: Res<CreationData>,
-	catalogue: Res<Catalogue>,
 	mut vessels: ResMut<Assets<SimVessel>>,
 	mut cmds: Commands,
 ) {
 	let sim = build_sim_vessel(&creation);
 	let id = uuid::Uuid::new_v4();
-	let rt = sim_to_rt(&sim, &catalogue);
 	vessels.insert(id, sim);
-	cmds.insert_resource(rt);
 	cmds.insert_resource(UserVesselId(id.into()));
 }
 
@@ -64,48 +61,3 @@ pub fn build_sim_vessel(
 		physics_properties: VesselProperties::default(),
 	}
 }
-
-
-pub fn sim_to_rt(
-	sim: &SimVessel,
-	catalogue: &Catalogue,
-) -> RtVesselData {
-	let graphics = sim.graphics.iter()
-		.map(|(elem_id, transform)| {
-			let elem = catalogue.find_by_id(elem_id);
-			VesselGraphicPart {
-				mesh: elem.graphics.mesh.clone(),
-				material: elem.graphics.material.clone(),
-				transform: *transform,
-			}
-		}).collect();
-		
-	RtVesselData {
-		graphics,
-		vessel_info: sim.physics_properties.clone(),
-	}
-}
-
-
-pub fn build_vessel(
-	sv: &CreationData,
-) -> RtVesselData {
-	let mut graphics = Vec::new();
-	
-	for obj in &sv.objects {
-		let pos = obj.pos.0;
-		let transform = Transform::from_translation(pos.as_vec3());
-		
-		graphics.push(VesselGraphicPart {
-			mesh: obj.element.graphics.mesh.clone(),
-			material: obj.element.graphics.material.clone(),
-			transform,
-		});
-	}
-	
-	RtVesselData {
-		vessel_info: VesselProperties::default(),
-		graphics,
-	}
-}
-

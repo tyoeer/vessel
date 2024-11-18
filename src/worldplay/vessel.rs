@@ -27,21 +27,6 @@ pub struct Id(pub uuid::Uuid);
 #[derive(Component)]
 pub struct VesselSpawned;
 
-///Everything required for a vessel at runtime
-#[derive(Resource, Clone, Default)]
-pub struct RtVesselData {
-	pub vessel_info: VesselProperties,
-	pub graphics: Vec<VesselGraphicPart>,
-}
-
-
-#[derive(Clone)]
-pub struct VesselGraphicPart {
-	pub mesh: Handle<Mesh>,
-	pub material: Handle<StandardMaterial>,
-	pub transform: Transform,
-}
-
 
 ///Physical behaviour of a vessel
 #[derive(Component, Clone)]

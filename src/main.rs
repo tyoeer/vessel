@@ -101,8 +101,7 @@ fn main() {
 	.add_plugins(worldplay::GameplayPlugin {
 		state: GameState::WorldPlay
 	})
-	.init_resource::<worldplay::vessel::RtVesselData>()
-
+	
 	.add_systems(OnTransition {
 		exited: GameState::EditVessel,
 		entered: GameState::WorldPlay

@@ -51,7 +51,6 @@ pub fn read_user_input(
 pub fn spawn_user(
 	mut cmds: Commands,
 	user_vessel_id: Res<UserVesselId>,
-	player_data: Res<vessel::RtVesselData>,
 ) {
 	let id = cmds.spawn((
 		LocallyControlled,
