@@ -34,6 +34,8 @@ uuid = "1.10"
 bevy_replicon = "0.28.4"
 bevy_replicon_renet = "0.5.0"
 serde = "1.0.214"
+bevy-panic-handler = "3.0.0"
+bevy_common_assets = {version = "0.11", features=["ron"]}
 
 
 [dependencies.derive_more]
