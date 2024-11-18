@@ -87,13 +87,17 @@ pub fn setup_catalogue(
 			graphics: object::Graphics {
 				material,
 				mesh: cube.clone()
-			}
+			},
+			id: "block".into(),
+			collider: avian3d::collision::Collider::cuboid(1., 1., 1.),
 		},
 		object::Element {
 			graphics: object::Graphics {
 				material: green,
 				mesh: cube
-			}
+			},
+			id: "green_block".into(),
+			collider: avian3d::collision::Collider::cuboid(1., 1., 1.),
 		},
 	];
 	

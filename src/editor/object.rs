@@ -42,6 +42,8 @@ pub struct Catalogue {
 ///Object type
 pub struct Element {
 	pub graphics: Graphics,
+	pub id: String,
+	pub collider: avian3d::collision::Collider,
 }
 
 pub type ElemRef = Arc<Element>;
