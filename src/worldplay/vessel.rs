@@ -1,5 +1,7 @@
 use avian3d::prelude::*;
 use bevy::prelude::*;
+use crate::editor::object::Catalogue;
+
 use super::*;
 
 
@@ -20,6 +22,10 @@ When inserted on an entity, will automatically cause the corresponding vessel to
 #[derive(Component, From, Into, Clone, Copy)]
 pub struct Id(pub uuid::Uuid);
 
+
+///A marker [Component] that says this entity has a vessel spawned from it's attached [Id]
+#[derive(Component)]
+pub struct VesselSpawned;
 
 ///Everything required for a vessel at runtime
 #[derive(Resource, Clone, Default)]
@@ -66,30 +72,21 @@ impl Default for VesselProperties {
 }
 
 
-
-#[derive(Event)]
-pub struct SpawnEvent {
-	pub rt_vessel_data: RtVesselData,
-	///Already existing entity to spawn the player into, used for multiplayer
-	pub player_entity: Option<Entity>,
-}
-
-
 pub fn spawn_vessels(
 	mut cmds: Commands,
 	root: Res<GameplayRoot>,
-	mut spawn_events: EventReader<SpawnEvent>,
+	todo: Query<(Entity, &Id), Without<VesselSpawned>>,
+	vessels: Res<Assets<SimVessel>>,
+	elements: Res<Catalogue>,
 ) {
-	for event in spawn_events.read() {
-		let player_data = &event.rt_vessel_data;
-		
-		let mut player_cmds = match event.player_entity {
-			None => cmds.spawn_empty(),
-			Some(entity) => cmds.entity(entity),
+	for (entity, id) in &todo {
+		let Some(vessel) = vessels.get(id.0) else {
+			continue;
 		};
 		
-		let player = player_cmds
-			.insert(player_data.vessel_info.clone())
+		let player = cmds.entity(entity)
+			.insert(VesselSpawned)
+			.insert(vessel.physics_properties.clone())
 			.insert(Control::default())
 			.insert(SpatialBundle::default())
 			.insert(RigidBody::Dynamic)
@@ -98,11 +95,12 @@ pub fn spawn_vessels(
 			.set_parent(root.0)
 			.id();
 		
-		for graphic in &player_data.graphics {
+		for (elem_id, transform) in &vessel.graphics {
+			let elem = elements.find_by_id(elem_id);
 			cmds.spawn(PbrBundle {
-				mesh: graphic.mesh.clone(),
-				material: graphic.material.clone(),
-				transform: graphic.transform,
+				mesh: elem.graphics.mesh.clone(),
+				material: elem.graphics.material.clone(),
+				transform: *transform,
 				..default()
 			}).set_parent(player);
 		}

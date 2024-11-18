@@ -4,7 +4,7 @@ use bevy::{color::palettes::css, prelude::*};
 use bevy_replicon::prelude::*;
 use serde::{Serialize, Deserialize};
 use crate::worldplay::{
-	self, user, vessel
+	self, user::{self, UserVesselId}, vessel
 };
 
 pub struct MultiplayerPlugin;
@@ -100,19 +100,14 @@ pub fn spawn_player(
 	mut cmds: Commands,
 	mut user_events: EventReader<FromClient<NewUserVessel>>,
 	mut client_owned_entities: ResMut<ClientOwnedEntities>,
-	rt_vessel_data: Res<vessel::RtVesselData>,
+	user_vessel_id: Res<UserVesselId>,
 	mut client_entity_map: ResMut<ClientEntityMap>,
-	mut spawn_events: EventWriter<vessel::SpawnEvent>,
 ) {
 	for event in user_events.read() {
 		let id = cmds.spawn(MultiPlayer)
 			.insert(Replicated)
+			.insert(user_vessel_id.0)
 			.id();
-		
-		spawn_events.send(vessel::SpawnEvent {
-			rt_vessel_data: rt_vessel_data.clone(),
-			player_entity: Some(id),
-		});
 		
 		client_entity_map.insert(event.client_id, ClientMapping {
 			server_entity: id,

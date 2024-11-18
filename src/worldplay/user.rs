@@ -52,7 +52,6 @@ pub fn spawn_user(
 	mut cmds: Commands,
 	user_vessel_id: Res<UserVesselId>,
 	player_data: Res<vessel::RtVesselData>,
-	mut spawn_events: EventWriter<vessel::SpawnEvent>,
 ) {
 	let id = cmds.spawn((
 		LocallyControlled,
@@ -64,11 +63,6 @@ pub fn spawn_user(
 			.looking_at(Vec3::ZERO, Vec3::Y),
 		..default()
 	}).set_parent(id);
-	
-	spawn_events.send(vessel::SpawnEvent {
-		rt_vessel_data: player_data.clone(),
-		player_entity: Some(id),
-	});
 }
 
 
