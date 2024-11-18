@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use avian3d::prelude::{AngularVelocity, LinearVelocity, Position, Rotation};
 use bevy::{color::palettes::css, prelude::*};
 use bevy_replicon::prelude::*;
 use serde::{Serialize, Deserialize};
@@ -14,7 +15,7 @@ impl Plugin for MultiplayerPlugin {
 		app
 			.init_resource::<ClientOwnedEntities>()
 			
-			.replicate_group::<(MultiPlayer, Transform)>()
+			.replicate_group::<(MultiPlayer, Position, Rotation, LinearVelocity, AngularVelocity)>()
 			.add_client_event::<vessel::Control>(ChannelKind::Ordered)
 			.add_client_event::<NewUserVessel>(ChannelKind::Unordered)
 			
