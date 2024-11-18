@@ -8,6 +8,11 @@ use bevy::prelude::*;
 use super::*;
 
 
+///The [vessel::Id] of the current user, as a [Resource]
+#[derive(Resource, From, Into, Clone)]
+pub struct UserVesselId(pub vessel::Id);
+
+
 ///A player thats is controlled by this client/user
 #[derive(Component, Clone, Copy)]
 pub struct LocallyControlled;
@@ -45,10 +50,14 @@ pub fn read_user_input(
 
 pub fn spawn_user(
 	mut cmds: Commands,
+	user_vessel_id: Res<UserVesselId>,
 	player_data: Res<vessel::RtVesselData>,
 	mut spawn_events: EventWriter<vessel::SpawnEvent>,
 ) {
-	let id = cmds.spawn(LocallyControlled).id();
+	let id = cmds.spawn((
+		LocallyControlled,
+		user_vessel_id.0
+	)).id();
 	
 	cmds.spawn(Camera3dBundle {
 		transform: Transform::from_xyz(0., 0., 0.)

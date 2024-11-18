@@ -4519,6 +4519,7 @@ dependencies = [
  "bevy_replicon_renet",
  "derive_more 1.0.0",
  "serde",
+ "uuid",
 ]
 
 [[package]]

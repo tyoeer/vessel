@@ -3,6 +3,24 @@ use bevy::prelude::*;
 use super::*;
 
 
+///Serializable form of a vessel meant to be played
+#[derive(Asset, TypePath)]
+pub struct SimVessel {
+	/// list of (element id, where to place it)
+	pub graphics: Vec<(String, Transform)>,
+	pub collider: Collider,
+	pub physics_properties: VesselProperties
+}
+
+
+/**
+Unique reference to a vessel.
+When inserted on an entity, will automatically cause the corresponding vessel to be spawned/attached to the entity.
+*/
+#[derive(Component, From, Into, Clone, Copy)]
+pub struct Id(pub uuid::Uuid);
+
+
 ///Everything required for a vessel at runtime
 #[derive(Resource, Clone, Default)]
 pub struct RtVesselData {

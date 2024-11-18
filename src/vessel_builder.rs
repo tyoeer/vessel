@@ -10,8 +10,8 @@ Vessel pipeline:
 */
 
 use avian3d::prelude::Collider;
-use bevy::{math::{Quat, Vec3}, prelude::{
-	Commands, Res, Transform
+use bevy::{asset::Assets, math::{Quat, Vec3}, prelude::{
+	Commands, Res, ResMut, Transform
 }};
 
 use crate::{
@@ -19,31 +19,24 @@ use crate::{
 		misc::CreationData,
 		object::Catalogue,
 	},
-	worldplay::vessel::{
-		RtVesselData,
-		VesselGraphicPart,
-		VesselProperties,
-	}
+	worldplay::{user::UserVesselId, vessel::{
+		RtVesselData, SimVessel, VesselGraphicPart, VesselProperties
+	}}
 };
 
 
 pub fn build_vessel_system(
 	creation: Res<CreationData>,
 	catalogue: Res<Catalogue>,
+	mut vessels: ResMut<Assets<SimVessel>>,
 	mut cmds: Commands,
 ) {
 	let sim = build_sim_vessel(&creation);
+	let id = uuid::Uuid::new_v4();
 	let rt = sim_to_rt(&sim, &catalogue);
+	vessels.insert(id, sim);
 	cmds.insert_resource(rt);
-}
-
-
-///Serializable form of a vessel meant to be played
-pub struct SimVessel {
-	/// list of (element id, where to place it)
-	graphics: Vec<(String, Transform)>,
-	collider: avian3d::collision::Collider,
-	physics_properties: VesselProperties
+	cmds.insert_resource(UserVesselId(id.into()));
 }
 
 
