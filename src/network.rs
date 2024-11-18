@@ -77,6 +77,7 @@ pub fn network_ui(
 
 
 /// A bevy system to start running the server. Used in the headless/dedicated server.
+#[cfg(not(feature="user_interface"))]
 pub fn setup_server_system(
 	mut cmds: Commands,
 	channels: Res<RepliconChannels>,
