@@ -19,7 +19,8 @@ fn main() {
 			..default()
 		}),
 		..default()
-	}));
+	}))
+	.add_plugins(bevy_panic_handler::PanicHandler::new().take_call_from_existing().build());
 	
 	#[cfg(not(feature="user_interface"))]
 	// plugin list copied from https://github.com/bevyengine/bevy/blob/a967c75e92aa08704f11459e4597f6a24bc476c3/crates/bevy_internal/src/default_plugins.rs#L81-L106
