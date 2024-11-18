@@ -87,11 +87,11 @@ pub fn spawn_vessels(
 		let player = cmds.entity(entity)
 			.insert(VesselSpawned)
 			.insert(vessel.physics_properties.clone())
+			.insert(vessel.collider.clone()) // in avian3d 0.1.2 this uses an Arc under the hood so is actually rather cheap
 			.insert(Control::default())
 			.insert(SpatialBundle::default())
 			.insert(RigidBody::Dynamic)
 			.insert(Friction::new(0.)) // extra friction is provided by the race track itself
-			.insert(Collider::cuboid(1., 1., 1.))
 			.set_parent(root.0)
 			.id();
 		
