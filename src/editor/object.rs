@@ -38,6 +38,15 @@ pub struct Catalogue {
 	pub elements: Vec<Arc<Element>>,
 }
 
+impl Catalogue {
+	///Panics if the asked for element isn't in this catalogue
+	pub fn find_by_id(&self, id: &str) -> Arc<Element> {
+		self.elements.iter()
+			.find(|elem| elem.id == id)
+			.cloned()
+			.unwrap()
+	}
+}
 
 ///Object type
 pub struct Element {
