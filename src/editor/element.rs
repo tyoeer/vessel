@@ -39,7 +39,7 @@ pub struct Element {
 	pub collider: avian3d::collision::Collider,
 }
 
-pub type ElemRef = Arc<Element>;
+pub type Ref = Arc<Element>;
 
 #[derive(Component, Into, From)]
-pub struct ElementComponent(pub ElemRef);
+pub struct Component(pub Ref);

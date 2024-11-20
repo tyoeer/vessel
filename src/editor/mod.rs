@@ -113,7 +113,7 @@ pub struct EditorRoot(pub Entity);
 
 ///Element to be placed by the user
 #[derive(Resource)]
-pub struct Hand(pub element::ElemRef);
+pub struct Hand(pub element::Ref);
 
 
 

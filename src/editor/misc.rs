@@ -17,7 +17,7 @@ impl CreationData {
 }
 
 pub fn store_objects(
-	q: Query<(&object::Pos, &element::ElementComponent)>,
+	q: Query<(&object::Pos, &element::Component)>,
 	mut cmds: Commands,
 ) {
 	let mut sv = CreationData::new();

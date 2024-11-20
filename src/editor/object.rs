@@ -12,7 +12,7 @@ use bevy_mod_picking::PickableBundle;
 use derive_more::derive::{From, Into};
 
 use super::EditorRoot;
-use super::element::*;
+use super::element;
 
 
 ///Position of an object within a creation
@@ -22,7 +22,7 @@ pub struct Pos(pub IVec3);
 
 ///Object info separate from ECS
 pub struct Object {
-	pub element: ElemRef,
+	pub element: element::Ref,
 	pub pos: Pos,
 }
 
@@ -53,7 +53,7 @@ pub fn create_event_handler(
 		})
 		.set_parent(root.0)
 		.insert(Pos::from(object_pos))
-		.insert(ElementComponent::from(element.clone()))
+		.insert(element::Component::from(element.clone()))
 		.insert(PickableBundle::default());
 	}
 }
@@ -68,6 +68,6 @@ pub mod event {
 	#[derive(Event)]
 	pub struct Create {
 		pub pos: Pos,
-		pub element: ElemRef,
+		pub element: element::Ref,
 	}
 }
