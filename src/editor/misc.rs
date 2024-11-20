@@ -54,8 +54,8 @@ pub fn hotbar_ui(
 			cross_align: egui::Align::Center,
 			cross_justify: false,
 		}, |ui| {
-			for (i, elem) in catalogue.elements.iter().enumerate() {
-				let button = egui::Button::new(i.to_string())
+			for elem in &catalogue.elements {
+				let button = egui::Button::new(&elem.id)
 					.min_size((40.,40.).into());
 				let button_res = ui.add(button);
 				
