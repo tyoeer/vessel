@@ -5,13 +5,14 @@ A creation consists of objects that are placed by the user.
 THe type of an object is it's element.
 */
 
-use std::sync::Arc;
+
 
 use bevy::prelude::*;
 use bevy_mod_picking::PickableBundle;
 use derive_more::derive::{From, Into};
 
 use super::EditorRoot;
+use super::element::*;
 
 
 ///Position of an object within a creation
@@ -25,40 +26,6 @@ pub struct Object {
 	pub pos: Pos,
 }
 
-
-pub struct Graphics {
-	pub material: Handle<StandardMaterial>,
-	pub mesh: Handle<Mesh>,
-}
-
-
-///List of all the available elements
-#[derive(Resource, Default)]
-pub struct Catalogue {
-	pub elements: Vec<Arc<Element>>,
-}
-
-impl Catalogue {
-	///Panics if the asked for element isn't in this catalogue
-	pub fn find_by_id(&self, id: &str) -> Arc<Element> {
-		self.elements.iter()
-			.find(|elem| elem.id == id)
-			.cloned()
-			.unwrap()
-	}
-}
-
-///Object type
-pub struct Element {
-	pub graphics: Graphics,
-	pub id: String,
-	pub collider: avian3d::collision::Collider,
-}
-
-pub type ElemRef = Arc<Element>;
-
-#[derive(Component, Into, From)]
-pub struct ElementComponent(pub ElemRef);
 
 ///Creates objects when [event::Create] happen
 pub fn create_event_handler(

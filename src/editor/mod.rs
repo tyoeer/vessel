@@ -22,7 +22,7 @@ use derive_more::{From, Into};
 pub mod object;
 pub mod input;
 pub mod misc;
-
+pub mod element;
 
 
 pub struct EditorPlugin<State: States> {
@@ -33,7 +33,7 @@ impl<State: States> Plugin for EditorPlugin<State> {
 	fn build(&self, app: &mut App) {
 		app
 			.add_event::<object::event::Create>()
-			.init_resource::<object::Catalogue>()
+			.init_resource::<element::Catalogue>()
 		;
 		app.add_systems(OnEnter(self.state.clone()), (
 			create_root,
@@ -65,7 +65,7 @@ impl<State: States> Plugin for EditorPlugin<State> {
 
 
 pub fn setup_catalogue(
-	mut catalogue: ResMut<object::Catalogue>,
+	mut catalogue: ResMut<element::Catalogue>,
 	mut meshes: ResMut<Assets<Mesh>>,
 	mut materials: ResMut<Assets<StandardMaterial>>,
 	mut cmds: Commands,
@@ -83,16 +83,16 @@ pub fn setup_catalogue(
 	});
 	
 	let elements = vec![
-		object::Element {
-			graphics: object::Graphics {
+		element::Element {
+			graphics: element::Graphics {
 				material,
 				mesh: cube.clone()
 			},
 			id: "block".into(),
 			collider: avian3d::collision::Collider::cuboid(1., 1., 1.),
 		},
-		object::Element {
-			graphics: object::Graphics {
+		element::Element {
+			graphics: element::Graphics {
 				material: green,
 				mesh: cube
 			},
@@ -113,7 +113,7 @@ pub struct EditorRoot(pub Entity);
 
 ///Element to be placed by the user
 #[derive(Resource)]
-pub struct Hand(pub object::ElemRef);
+pub struct Hand(pub element::ElemRef);
 
 
 

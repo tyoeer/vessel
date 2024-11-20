@@ -1,6 +1,6 @@
 use avian3d::prelude::*;
 use bevy::prelude::*;
-use crate::editor::object::Catalogue;
+use crate::editor::element::Catalogue;
 
 use super::*;
 

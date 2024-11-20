@@ -17,7 +17,7 @@ impl CreationData {
 }
 
 pub fn store_objects(
-	q: Query<(&object::Pos, &object::ElementComponent)>,
+	q: Query<(&object::Pos, &element::ElementComponent)>,
 	mut cmds: Commands,
 ) {
 	let mut sv = CreationData::new();
@@ -35,7 +35,7 @@ pub fn store_objects(
 
 pub fn hotbar_ui( 
 	mut contexts: bevy_egui::EguiContexts,
-	catalogue: Res<object::Catalogue>,
+	catalogue: Res<element::Catalogue>,
 	mut selected: ResMut<Hand>,
 ) {
 	use bevy_egui::egui;
