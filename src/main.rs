@@ -200,31 +200,33 @@ fn absorb_egui_inputs(
 		// So this still runs while there's no context anymore
 		return;
 	};
-	if !ctx.wants_pointer_input() && !ctx.is_pointer_over_area() {
-		return;
+	
+	if ctx.wants_pointer_input() || ctx.is_pointer_over_area() {
+		picking_settings.is_mouse_enabled = false;
+		mouse.reset_all();
+		mouse_wheel.clear();
+		mouse_button_events.clear();
 	}
 	
-	picking_settings.is_mouse_enabled = false;
-	
-	let modifiers = [
-		KeyCode::SuperLeft,
-		KeyCode::SuperRight,
-		KeyCode::ControlLeft,
-		KeyCode::ControlRight,
-		KeyCode::AltLeft,
-		KeyCode::AltRight,
-		KeyCode::ShiftLeft,
-		KeyCode::ShiftRight,
-	];
-	
-	let pressed = modifiers.map(|key| keyboard.pressed(key).then_some(key));
-	
-	mouse.reset_all();
-	mouse_wheel.clear();
-	mouse_button_events.clear();
-	keyboard.reset_all();
-	
-	for key in pressed.into_iter().flatten() {
-		keyboard.press(key);
+	if ctx.wants_keyboard_input() {
+		let dont_absorb = [
+			KeyCode::SuperLeft,
+			KeyCode::SuperRight,
+			KeyCode::ControlLeft,
+			KeyCode::ControlRight,
+			KeyCode::AltLeft,
+			KeyCode::AltRight,
+			KeyCode::ShiftLeft,
+			KeyCode::ShiftRight,
+		];
+		
+		let dont_absorb_pressed = dont_absorb.map(|key| keyboard.pressed(key).then_some(key));
+		
+		keyboard.reset_all();
+		
+		for key in dont_absorb_pressed.into_iter().flatten() {
+			keyboard.press(key);
+		}
 	}
+	
 }
