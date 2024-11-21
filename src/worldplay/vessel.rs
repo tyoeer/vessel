@@ -1,17 +1,18 @@
 use avian3d::prelude::*;
 use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
 use crate::editor::element::Catalogue;
 
 use super::*;
 
 
 ///Serializable form of a vessel meant to be played
-#[derive(Asset, TypePath)]
+#[derive(Asset, TypePath, Debug, Clone, Serialize, Deserialize)]
 pub struct SimVessel {
 	/// list of (element id, where to place it)
 	pub graphics: Vec<(String, Transform)>,
 	pub collider: Collider,
-	pub physics_properties: VesselProperties
+	pub physics_properties: VesselProperties,
 }
 
 
@@ -19,7 +20,7 @@ pub struct SimVessel {
 Unique reference to a vessel.
 When inserted on an entity, will automatically cause the corresponding vessel to be spawned/attached to the entity.
 */
-#[derive(Component, From, Into, Clone, Copy)]
+#[derive(Component, From, Into, Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Id(pub uuid::Uuid);
 
 
@@ -29,7 +30,7 @@ pub struct VesselSpawned;
 
 
 ///Physical behaviour of a vessel
-#[derive(Component, Clone)]
+#[derive(Component, Clone, Debug, Serialize, Deserialize)]
 pub struct VesselProperties {
 	///How much forwards force to apply when the input is fully forwards
 	pub control_forwards_force: f32,

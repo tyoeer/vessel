@@ -81,17 +81,24 @@ pub fn apply_client_movement(
 
 #[derive(Event, Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct NewUserVessel {
+	///The uuid of the sim_vessel asset
+	vessel_id: vessel::Id,
+	///The data of the vessel
+	sim_vessel: vessel::SimVessel,
 	///The entity id of the prespawned id of the entity
-	client_entity: Entity
+	client_entity: Entity,
 }
 
 
 pub fn send_user_vessel(
-	local_vessel_query: Query<Entity, With<user::LocallyControlled>>,
+	local_vessel_query: Query<(Entity, &vessel::Id), With<user::LocallyControlled>>,
+	vessels: Res<Assets<vessel::SimVessel>>,
 	mut events: EventWriter<NewUserVessel>,
 ) {
-	let id = local_vessel_query.single();
+	let (id, vessel_id) = local_vessel_query.single();
 	events.send(NewUserVessel {
+		vessel_id: *vessel_id,
+		sim_vessel: vessels.get(vessel_id.0).expect("user vessel id should point to existing vessel").clone(),
 		client_entity: id,
 	});
 }
@@ -101,21 +108,23 @@ pub fn spawn_player(
 	mut cmds: Commands,
 	mut user_events: EventReader<FromClient<NewUserVessel>>,
 	mut client_owned_entities: ResMut<ClientOwnedEntities>,
-	user_vessel_id: Res<UserVesselId>,
+	mut vessels: ResMut<Assets<vessel::SimVessel>>,
 	mut client_entity_map: ResMut<ClientEntityMap>,
 ) {
-	for event in user_events.read() {
+	for client_event in user_events.read() {
+		vessels.insert(client_event.event.vessel_id.0, client_event.event.sim_vessel.clone());
+		
 		let id = cmds.spawn(MultiPlayer)
 			.insert(Replicated)
-			.insert(user_vessel_id.0)
+			.insert(client_event.event.vessel_id)
 			.id();
 		
-		client_entity_map.insert(event.client_id, ClientMapping {
+		client_entity_map.insert(client_event.client_id, ClientMapping {
 			server_entity: id,
-			client_entity: event.event.client_entity,
+			client_entity: client_event.event.client_entity,
 		});
 		
-		client_owned_entities.map.insert(event.client_id, id);
+		client_owned_entities.map.insert(client_event.client_id, id);
 	}
 }
 
