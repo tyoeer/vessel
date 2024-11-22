@@ -161,6 +161,9 @@ pub fn spawn_player(
 
 pub fn connection_handler(
 	mut events: EventReader<ServerEvent>,
+	active_vessels: Query<&vessel::Id, With<MultiPlayer>>,
+	vessels: Res<Assets<vessel::SimVessel>>,
+	mut new_vessel_send: EventWriter<ToClients<AddVessel>>,
 	mut cmds: Commands,
 	mut client_owned_entities: ResMut<ClientOwnedEntities>,
 ) {
@@ -168,6 +171,21 @@ pub fn connection_handler(
 		match event {
 			ServerEvent::ClientConnected { client_id } => {
 				info!(?client_id, "client connected");
+				
+				for id in &active_vessels {
+					let Some(vessel) = vessels.get(id.0)  else {
+						// 🤷
+						warn!(vessel_id=?id.0, ?client_id, "trying to share vessel \\w client, but we don't have it");
+						continue;
+					};
+					new_vessel_send.send(ToClients {
+						mode: SendMode::Direct(*client_id),
+						event: AddVessel {
+							vessel_id: *id,
+							sim_vessel: vessel.clone(),
+						},
+					});
+				}
 			},
 			ServerEvent::ClientDisconnected { client_id, reason } => {
 				info!(?client_id, reason, "client disconnected");
