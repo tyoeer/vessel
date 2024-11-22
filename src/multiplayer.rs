@@ -15,9 +15,10 @@ impl Plugin for MultiplayerPlugin {
 		app
 			.init_resource::<ClientOwnedEntities>()
 			
-			.replicate_group::<(MultiPlayer, Position, Rotation, LinearVelocity, AngularVelocity)>()
+			.replicate_group::<(MultiPlayer, vessel::Id, Position, Rotation, LinearVelocity, AngularVelocity)>()
 			.add_client_event::<vessel::Control>(ChannelKind::Ordered)
 			.add_client_event::<NewUserVessel>(ChannelKind::Unordered)
+			.add_server_event::<AddVessel>(ChannelKind::Unordered)
 			
 			.add_systems(OnEnter(crate::GameState::WorldPlay), send_user_vessel.after(user::spawn_user).run_if(client_connected))
 		;
@@ -40,6 +41,7 @@ impl Plugin for MultiplayerPlugin {
 				.run_if(server_running)
 			)
 			.add_systems(PreUpdate, setup_player.after(ClientSet::Receive).run_if(client_connected))
+			.add_systems(PreUpdate, receive_server_vessels.after(ClientSet::Receive).run_if(client_connected))
 			.add_systems(PostUpdate, send_movement.before(ClientSet::Send).run_if(client_connected))
 		;
 	}
@@ -79,6 +81,25 @@ pub fn apply_client_movement(
 }
 
 
+#[derive(Event, serde::Serialize, serde::Deserialize)]
+pub struct AddVessel {
+	///The uuid of the sim_vessel asset
+	vessel_id: vessel::Id,
+	///The data of the vessel
+	sim_vessel: vessel::SimVessel,
+}
+
+
+pub fn receive_server_vessels(
+	mut add_vessel_events: EventReader<AddVessel>,
+	mut vessels: ResMut<Assets<vessel::SimVessel>>,
+) {
+	for event in add_vessel_events.read() {
+		vessels.insert(event.vessel_id.0, event.sim_vessel.clone());
+	}
+}
+
+
 #[derive(Event, Clone, Debug, serde::Serialize, serde::Deserialize)]
 pub struct NewUserVessel {
 	///The uuid of the sim_vessel asset
@@ -106,13 +127,22 @@ pub fn send_user_vessel(
 
 pub fn spawn_player(
 	mut cmds: Commands,
-	mut user_events: EventReader<FromClient<NewUserVessel>>,
+	mut new_user_vessel_events: EventReader<FromClient<NewUserVessel>>,
+	mut new_vessel_send: EventWriter<ToClients<AddVessel>>,
 	mut client_owned_entities: ResMut<ClientOwnedEntities>,
 	mut vessels: ResMut<Assets<vessel::SimVessel>>,
 	mut client_entity_map: ResMut<ClientEntityMap>,
 ) {
-	for client_event in user_events.read() {
+	for client_event in new_user_vessel_events.read() {
 		vessels.insert(client_event.event.vessel_id.0, client_event.event.sim_vessel.clone());
+		
+		new_vessel_send.send(ToClients {
+			mode: SendMode::BroadcastExcept(client_event.client_id),
+			event: AddVessel {
+				vessel_id: client_event.event.vessel_id,
+				sim_vessel: client_event.event.sim_vessel.clone(),
+			}
+		});
 		
 		let id = cmds.spawn(MultiPlayer)
 			.insert(Replicated)
