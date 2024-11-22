@@ -67,6 +67,7 @@ pub fn spawn_vessels(
 ) {
 	for (entity, id) in &todo {
 		let Some(vessel) = vessels.get(id.0) else {
+			warn!("no vessel with asked for id {}", id.0);
 			continue;
 		};
 		
