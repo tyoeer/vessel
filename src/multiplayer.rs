@@ -5,7 +5,7 @@ use bevy::{color::palettes::css, prelude::*};
 use bevy_replicon::prelude::*;
 use serde::{Serialize, Deserialize};
 use crate::worldplay::{
-	self, user::{self, UserVesselId}, vessel
+	self, user, vessel,
 };
 
 pub struct MultiplayerPlugin;
