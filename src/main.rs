@@ -79,6 +79,9 @@ fn main() {
 	app.add_plugins(bevy_mod_picking::DefaultPickingPlugins)
 		.insert_resource(bevy_mod_picking::debug::DebugPickingMode::Normal);
 	
+	#[cfg(feature="user_interface")]
+	app.add_plugins(bevy_inspector_egui::quick::WorldInspectorPlugin::new());
+	
 	#[cfg(not(feature="user_interface"))]
 	app.insert_state(GameState::WorldPlay)
 		.add_systems(Startup, network::setup_server_system);

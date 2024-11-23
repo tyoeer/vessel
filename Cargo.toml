@@ -36,6 +36,7 @@ bevy_replicon_renet = "0.5.0"
 serde = "1.0.214"
 bevy-panic-handler = "3.0.0"
 bevy_common_assets = {version = "0.11", features=["ron"]}
+bevy-inspector-egui = { version = "0.27.0", default-features = false, features=["bevy_render"] }
 
 
 [dependencies.derive_more]
