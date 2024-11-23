@@ -24,7 +24,12 @@ impl Plugin for MultiplayerPlugin {
 		;
 		
 		#[cfg(feature="user_interface")]
-		app.add_systems(Update, mark_players.after(vessel::move_vessel));
+		app
+			.add_systems(Update, mark_players.after(vessel::move_vessel))
+			.add_systems(
+				OnEnter(crate::GameState::WorldPlay),
+				mark_server_user.after(user::spawn_user).run_if(server_running)
+			);
 		
 		app
 			.add_systems(Update, apply_client_movement
@@ -122,6 +127,16 @@ pub fn send_user_vessel(
 		sim_vessel: vessels.get(vessel_id.0).expect("user vessel id should point to existing vessel").clone(),
 		client_entity: id,
 	});
+}
+
+
+pub fn mark_server_user(
+	local: Query<Entity, (With<user::LocallyControlled>, With<vessel::Id>, Without<MultiPlayer>)>,
+	mut cmds: Commands,
+) {
+	for entity in &local {
+		cmds.entity(entity).insert(MultiPlayer);
+	}
 }
 
 
