@@ -20,6 +20,7 @@ impl<State: States> Plugin for GameplayPlugin<State> {
 	fn build(&self, app: &mut App) {
 		app.init_resource::<user::CameraSettings>();
 		app.init_asset::<vessel::SimVessel>();
+		app.register_asset_reflect::<vessel::SimVessel>();
 		app.add_systems(OnEnter(self.state.clone()), (
 			create_root,
 			(

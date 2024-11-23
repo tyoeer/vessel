@@ -62,7 +62,6 @@ fn main() {
 	.add_plugins((
 		bevy_replicon::RepliconPlugins,
 		bevy_replicon_renet::RepliconRenetPlugins,
-		multiplayer::MultiplayerPlugin,
 	))
 	;
 
@@ -78,6 +77,9 @@ fn main() {
 	#[cfg(feature="user_interface")]
 	app.add_plugins(bevy_mod_picking::DefaultPickingPlugins)
 		.insert_resource(bevy_mod_picking::debug::DebugPickingMode::Normal);
+	
+	//Needs to run after bevy_egui because otherwise it double adds bevy_egui through bevy_inspector_egui
+	app.add_plugins(multiplayer::MultiplayerPlugin);
 	
 	#[cfg(feature="user_interface")]
 	app.add_plugins(bevy_inspector_egui::quick::WorldInspectorPlugin::new());

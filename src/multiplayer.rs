@@ -23,6 +23,8 @@ impl Plugin for MultiplayerPlugin {
 			.add_systems(OnEnter(crate::GameState::WorldPlay), send_user_vessel.after(user::spawn_user).run_if(client_connected))
 		;
 		
+		app.add_plugins(bevy_inspector_egui::quick::FilterQueryInspectorPlugin::<With<MultiPlayer>>::new());
+		
 		#[cfg(feature="user_interface")]
 		app
 			.add_systems(Update, mark_players.after(vessel::move_vessel))
