@@ -137,6 +137,7 @@ fn setup_demo_track(
 		transform: Transform::from_xyz(0.,-10.,-5.),
 		..default()
 	})
+	.insert(Name::new("World/Track"))
 	.insert(ColliderConstructorHierarchy::new(ColliderConstructor::TrimeshFromMeshWithConfig(
 		TrimeshFlags::MERGE_DUPLICATE_VERTICES
 		| TrimeshFlags::DELETE_DUPLICATE_TRIANGLES 

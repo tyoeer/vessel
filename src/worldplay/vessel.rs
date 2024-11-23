@@ -21,7 +21,7 @@ pub struct SimVessel {
 Unique reference to a vessel.
 When inserted on an entity, will automatically cause the corresponding vessel to be spawned/attached to the entity.
 */
-#[derive(Component, From, Into, Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Component, Reflect, From, Into, Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct Id(pub uuid::Uuid);
 
 
@@ -76,6 +76,7 @@ pub fn spawn_vessels(
 		
 		let player = cmds.entity(entity)
 			.insert(VesselSpawned)
+			.insert(Name::new(format!("Vessel {}",id.0)))
 			.insert(vessel.physics_properties.clone())
 			.insert(vessel.collider.clone()) // in avian3d 0.1.2 this uses an Arc under the hood so is actually rather cheap
 			.insert(Control::default())
@@ -92,7 +93,7 @@ pub fn spawn_vessels(
 				material: elem.graphics.material.clone(),
 				transform: *transform,
 				..default()
-			}).set_parent(player);
+			}).insert(Name::new("Vessel Graphic")).set_parent(player);
 		}
 	}
 }

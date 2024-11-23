@@ -21,6 +21,7 @@ impl<State: States> Plugin for GameplayPlugin<State> {
 		app.init_resource::<user::CameraSettings>();
 		app.init_asset::<vessel::SimVessel>();
 		app.register_asset_reflect::<vessel::SimVessel>();
+		app.register_type::<vessel::Id>();
 		app.add_systems(OnEnter(self.state.clone()), (
 			create_root,
 			(
@@ -57,6 +58,7 @@ pub fn create_root(
 ) {
 	let root = cmds.spawn_empty()
 		.insert(SpatialBundle::default())
+		.insert(Name::new("Worldplay Root"))
 		.id();
 	cmds.insert_resource(GameplayRoot(root));
 }

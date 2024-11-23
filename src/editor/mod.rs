@@ -123,6 +123,7 @@ fn create_root(
 ) {
 	let root = cmds.spawn_empty()
 		.insert(SpatialBundle::default())
+		.insert(Name::new("Editor Root"))
 		.id();
 	cmds.insert_resource(EditorRoot(root));
 }

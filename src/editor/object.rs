@@ -52,6 +52,7 @@ pub fn create_event_handler(
 			..default()
 		})
 		.set_parent(root.0)
+		.insert(Name::new(format!("Object of {}",element.id)))
 		.insert(Pos::from(object_pos))
 		.insert(element::Component::from(element.clone()))
 		.insert(PickableBundle::default());
