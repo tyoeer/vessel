@@ -24,6 +24,15 @@ impl Plugin for MultiplayerPlugin {
 		;
 		
 		app.add_plugins(bevy_inspector_egui::quick::FilterQueryInspectorPlugin::<With<MultiPlayer>>::new());
+		/*
+		app.add_plugins(bevy_inspector_egui::quick::FilterQueryInspectorPlugin::<(
+			With<MultiPlayer>,
+			With<vessel::Id>,
+			With<Position>,
+			With<Rotation>,
+			With<LinearVelocity>,
+			With<AngularVelocity>,
+		)>::new());// */
 		
 		#[cfg(feature="user_interface")]
 		app
@@ -137,7 +146,10 @@ pub fn mark_server_user(
 	mut cmds: Commands,
 ) {
 	for entity in &local {
-		cmds.entity(entity).insert(MultiPlayer);
+		cmds.entity(entity)
+			.insert(MultiPlayer)
+			.insert(Replicated)
+		;
 	}
 }
 
