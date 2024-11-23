@@ -220,7 +220,7 @@ pub fn setup_player(
 ) {
 	for entity in &todo {
 		cmds.entity(entity).insert((
-			GlobalTransform::default(),
+			TransformBundle::default(),
 			VisibilityBundle::default(),
 		));
 	}
