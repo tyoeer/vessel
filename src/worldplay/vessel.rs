@@ -71,6 +71,8 @@ pub fn spawn_vessels(
 			continue;
 		};
 		
+		debug!(vessel=?id, ?entity, "spawned vessel");
+		
 		let player = cmds.entity(entity)
 			.insert(VesselSpawned)
 			.insert(vessel.physics_properties.clone())
