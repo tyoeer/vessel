@@ -78,8 +78,6 @@ fn main() {
 	app.add_plugins(bevy_mod_picking::DefaultPickingPlugins)
 		.insert_resource(bevy_mod_picking::debug::DebugPickingMode::Normal);
 	
-	//Needs to run after bevy_egui because otherwise it double adds bevy_egui through bevy_inspector_egui
-	app.add_plugins(multiplayer::MultiplayerPlugin);
 	
 	#[cfg(feature="user_interface")]
 	app.add_plugins(bevy_inspector_egui::quick::WorldInspectorPlugin::new());
@@ -105,9 +103,12 @@ fn main() {
 	app
 	.add_plugins(worldplay::GameplayPlugin {
 		state: GameState::WorldPlay
-	})
+	});
 	
-	.add_systems(OnTransition {
+	//Depends on the GameplayPlugin, so should be added later
+	app.add_plugins(multiplayer::MultiplayerPlugin);
+	
+	app.add_systems(OnTransition {
 		exited: GameState::EditVessel,
 		entered: GameState::WorldPlay
 	}, vessel_builder::build_vessel_system)
