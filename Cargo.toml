@@ -24,7 +24,7 @@ user_interface = [
 	# "bevy/default"
 ]
 
-# for things that help during development, but should be disbaled on release/distribution
+# for things that help during development, but should be disabled on release/distribution
 develop = [ "bevy/dynamic_linking" ]
 
 
