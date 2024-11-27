@@ -56,7 +56,8 @@ fn main() {
 	.add_plugins(PhysicsPlugins::default())
 	//Fix physics slowing down when the window is unfocussed
 	// see also https://github.com/Jondolf/avian/pull/457
-	.insert_resource(Time::new_with(Physics::variable(1.)))
+	//This also shouldn't be too high, because then objects will tunnel through the ground when dragging the window
+	.insert_resource(Time::new_with(Physics::variable(0.1)))
 	.insert_resource(Gravity(-Vec3::Y * 15.))
 	
 	.add_plugins((
