@@ -327,7 +327,7 @@ pub fn mark_players(
 	mut gizmos: Gizmos,
 ) {
 	for (tf, maybe_control, maybe_force) in &query {
-		gizmos.sphere(tf.translation, tf.rotation, 0.5, css::WHITE);
+		gizmos.sphere(Isometry3d::new(tf.translation, tf.rotation), 0.5, css::WHITE);
 		if let Some(control) = maybe_control {
 			let offset =  control.0.extend(0.).xzy()*2.;
 			gizmos.line(tf.translation, tf.translation + tf.rotation * offset, css::BLUE);

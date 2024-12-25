@@ -19,8 +19,7 @@ fn main() {
 			..default()
 		}),
 		..default()
-	}))
-	.add_plugins(bevy_panic_handler::PanicHandler::new().take_call_from_existing().build());
+	}));
 	
 	#[cfg(not(feature="user_interface"))]
 	// plugin list copied from https://github.com/bevyengine/bevy/blob/a967c75e92aa08704f11459e4597f6a24bc476c3/crates/bevy_internal/src/default_plugins.rs#L81-L106
@@ -54,10 +53,6 @@ fn main() {
 	app
 	
 	.add_plugins(PhysicsPlugins::default())
-	//Fix physics slowing down when the window is unfocussed
-	// see also https://github.com/Jondolf/avian/pull/457
-	//This also shouldn't be too high, because then objects will tunnel through the ground when dragging the window
-	.insert_resource(Time::new_with(Physics::variable(0.1)))
 	.insert_resource(Gravity(-Vec3::Y * 15.))
 	
 	.add_plugins((
@@ -65,7 +60,7 @@ fn main() {
 		bevy_replicon_renet::RepliconRenetPlugins,
 	))
 	;
-
+	
 	#[cfg(feature="user_interface")]
 	app.add_plugins(bevy_egui::EguiPlugin)
 		.add_systems(
@@ -74,10 +69,6 @@ fn main() {
 			.after(bevy_egui::systems::process_input_system)
 			.before(bevy_egui::EguiSet::BeginPass)
 		);
-	
-	#[cfg(feature="user_interface")]
-	app.add_plugins(bevy_mod_picking::DefaultPickingPlugins)
-		.insert_resource(bevy_mod_picking::debug::DebugPickingMode::Normal);
 	
 	
 	#[cfg(feature="user_interface")]
@@ -135,7 +126,7 @@ fn setup_demo_track(
 	
 	let scene = assets.load("local/track.glb#Scene0");
 	cmds.spawn(SceneBundle {
-		scene,
+		scene: SceneRoot(scene),
 		transform: Transform::from_xyz(0.,-10.,-5.),
 		..default()
 	})
@@ -198,7 +189,7 @@ fn absorb_egui_inputs(
 	mut mouse_wheel: ResMut<Events<MouseWheel>>,
 	mut mouse_button_events: ResMut<Events<MouseButtonInput>>,
 	mut keyboard: ResMut<ButtonInput<KeyCode>>,
-	mut picking_settings: ResMut<bevy_mod_picking::input::InputPluginSettings>
+	mut picking_settings: ResMut<bevy::picking::input::PointerInputPlugin>,
 ) {
 	//bevy_mod_picking runs too early, so we have to disable it some other way
 	picking_settings.is_mouse_enabled = true;

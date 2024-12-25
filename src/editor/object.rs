@@ -8,7 +8,6 @@ THe type of an object is it's element.
 
 
 use bevy::prelude::*;
-use bevy_mod_picking::PickableBundle;
 use derive_more::derive::{From, Into};
 
 use super::EditorRoot;
@@ -46,16 +45,15 @@ pub fn create_event_handler(
 		let transform = Transform::from_translation(pos + offset);
 		
 		cmd.spawn(PbrBundle {
-			mesh: element.graphics.mesh.clone(),
-			material: element.graphics.material.clone(),
+			mesh: Mesh3d(element.graphics.mesh.clone()),
+			material: MeshMaterial3d(element.graphics.material.clone()),
 			transform,
 			..default()
 		})
 		.set_parent(root.0)
 		.insert(Name::new(format!("Object of {}",element.id)))
 		.insert(Pos::from(object_pos))
-		.insert(element::Component::from(element.clone()))
-		.insert(PickableBundle::default());
+		.insert(element::Component::from(element.clone()));
 	}
 }
 

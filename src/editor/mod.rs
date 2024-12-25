@@ -15,7 +15,6 @@ use bevy::{
 	input::common_conditions::input_just_pressed,
 	prelude::*
 };
-use bevy_mod_picking::events::{Click, Pointer};
 use derive_more::{From, Into};
 
 

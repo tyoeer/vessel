@@ -89,8 +89,8 @@ pub fn spawn_vessels(
 		for (elem_id, transform) in &vessel.graphics {
 			let elem = elements.find_by_id(elem_id);
 			cmds.spawn(PbrBundle {
-				mesh: elem.graphics.mesh.clone(),
-				material: elem.graphics.material.clone(),
+				mesh: Mesh3d(elem.graphics.mesh.clone()),
+				material: MeshMaterial3d(elem.graphics.material.clone()),
 				transform: *transform,
 				..default()
 			}).insert(Name::new("Vessel Graphic")).set_parent(player);

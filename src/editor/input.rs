@@ -52,7 +52,7 @@ pub fn move_camera(
 			local_offset.x += 1.;
 		}
 		
-		let offset = tf.rotation.mul_vec3(local_offset * MOVE_SPEED * timer.delta_seconds());
+		let offset = tf.rotation.mul_vec3(local_offset * MOVE_SPEED * timer.delta_secs());
 		tf.translation += offset;
 		
 		// const SIZE: f32 = 0.3;

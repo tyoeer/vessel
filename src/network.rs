@@ -1,11 +1,11 @@
 use bevy::prelude::*;
 use bevy_replicon::prelude::*;
 use bevy_replicon_renet::{
+	netcode::{
+		ClientAuthentication, NetcodeClientTransport, NetcodeServerTransport,
+		ServerAuthentication, ServerConfig,
+	},
 	renet::{
-		transport::{
-			ClientAuthentication, NetcodeClientTransport, NetcodeServerTransport,
-			ServerAuthentication, ServerConfig,
-		},
 		ConnectionConfig, RenetClient, RenetServer,
 	},
 	RenetChannelsExt,
