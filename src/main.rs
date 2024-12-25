@@ -50,6 +50,8 @@ fn main() {
 		.register_type::<bevy::render::primitives::Aabb>() // required to spawn the track scene
 	;
 	
+	app.add_plugins(MeshPickingPlugin);
+	
 	app
 	
 	.add_plugins(PhysicsPlugins::default())
