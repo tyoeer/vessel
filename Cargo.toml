@@ -29,31 +29,21 @@ develop = [ "bevy/dynamic_linking" ]
 
 
 [dependencies]
-avian3d = {version="0.1.2", features=["serialize"]}
+avian3d = {version="0.2.0", features=["serialize"]}
 uuid = "1.10"
-bevy_replicon = "0.28.4"
-bevy_replicon_renet = "0.5.0"
+bevy_replicon = "0.29.1"
+bevy_replicon_renet = "0.6.0"
 serde = "1.0.214"
-bevy-panic-handler = "3.0.0"
-bevy_common_assets = {version = "0.11", features=["ron"]}
-bevy-inspector-egui = { version = "0.27.0", default-features = false, features=["bevy_render"] }
+bevy_common_assets = {version = "0.12", features=["ron"]}
+bevy-inspector-egui = { version = "0.28.0", default-features = false, features=["bevy_render"] }
 
 
 [dependencies.derive_more]
 version = "1.0.0"
 features = ["from","into"]
 
-[dependencies.bevy_mod_picking]
-version = "0.20.1"
-default-features = false
-features = [
-	"backend_raycast",
-	"debug",
-	"highlight"
-]
-
 [dependencies.bevy_egui]
-version = "0.30"
+version = "0.31"
 default-features = false
 features = [
 	"render",
@@ -62,5 +52,5 @@ features = [
 ]
 
 [dependencies.bevy]
-version = "0.14"
+version = "0.15"
 # features = ["dynamic_linking"]
