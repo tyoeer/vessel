@@ -99,12 +99,12 @@ pub fn setup_camera(
 	mut cmds: Commands,
 	root: Res<EditorRoot>,
 ) {
-	cmds.spawn(Camera3dBundle {
-		projection: PerspectiveProjection {
+	cmds.spawn((
+		Camera3d::default(),
+		PerspectiveProjection {
 			fov: 80.,
 			..default()
-		}.into(),
-		transform: Transform::default().looking_to(Vec3::X, Vec3::Y),
-		..default()
-	}).set_parent(root.0);
+		},
+		Transform::default().looking_to(Vec3::X, Vec3::Y),
+	)).set_parent(root.0);
 }

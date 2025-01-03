@@ -80,7 +80,8 @@ pub fn spawn_vessels(
 			.insert(vessel.physics_properties.clone())
 			.insert(vessel.collider.clone()) // in avian3d 0.1.2 this uses an Arc under the hood so is actually rather cheap
 			.insert(Control::default())
-			.insert(SpatialBundle::default())
+			.insert(Transform::default())
+			.insert(Visibility::default())
 			.insert(RigidBody::Dynamic)
 			.insert(Friction::new(0.)) // extra friction is provided by the race track itself
 			.set_parent(root.0)
@@ -88,12 +89,12 @@ pub fn spawn_vessels(
 		
 		for (elem_id, transform) in &vessel.graphics {
 			let elem = elements.find_by_id(elem_id);
-			cmds.spawn(PbrBundle {
-				mesh: Mesh3d(elem.graphics.mesh.clone()),
-				material: MeshMaterial3d(elem.graphics.material.clone()),
-				transform: *transform,
-				..default()
-			}).insert(Name::new("Vessel Graphic")).set_parent(player);
+			cmds.spawn((
+				Mesh3d(elem.graphics.mesh.clone()),
+				MeshMaterial3d(elem.graphics.material.clone()),
+				*transform,
+				Name::new("Vessel Graphic"),
+			)).set_parent(player);
 		}
 	}
 }

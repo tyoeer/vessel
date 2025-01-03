@@ -310,8 +310,8 @@ pub fn setup_player(
 ) {
 	for entity in &todo {
 		cmds.entity(entity).insert((
-			TransformBundle::default(),
-			VisibilityBundle::default(),
+			Transform::default(),
+			Visibility::default(),
 		));
 	}
 }

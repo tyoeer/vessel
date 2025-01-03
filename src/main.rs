@@ -1,4 +1,4 @@
-use avian3d::{prelude::{Gravity, Physics}, PhysicsPlugins};
+use avian3d::{prelude::Gravity, PhysicsPlugins};
 use bevy::{input::mouse::{MouseButtonInput, MouseWheel}, prelude::*};
 
 mod editor;
@@ -127,11 +127,10 @@ fn setup_demo_track(
 	use avian3d::prelude::*;
 	
 	let scene = assets.load("local/track.glb#Scene0");
-	cmds.spawn(SceneBundle {
-		scene: SceneRoot(scene),
-		transform: Transform::from_xyz(0.,-10.,-5.),
-		..default()
-	})
+	cmds.spawn((
+		SceneRoot(scene),
+		Transform::from_xyz(0.,-10.,-5.),
+	))
 	.insert(Name::new("World/Track"))
 	.insert(ColliderConstructorHierarchy::new(ColliderConstructor::TrimeshFromMeshWithConfig(
 		TrimeshFlags::MERGE_DUPLICATE_VERTICES

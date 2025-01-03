@@ -121,7 +121,7 @@ fn create_root(
 	mut cmds: Commands
 ) {
 	let root = cmds.spawn_empty()
-		.insert(SpatialBundle::default())
+		.insert((Transform::default(), Visibility::default()))
 		.insert(Name::new("Editor Root"))
 		.id();
 	cmds.insert_resource(EditorRoot(root));

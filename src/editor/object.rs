@@ -44,12 +44,11 @@ pub fn create_event_handler(
 		let offset = object_size.as_vec3() / 2.;
 		let transform = Transform::from_translation(pos + offset);
 		
-		cmd.spawn(PbrBundle {
-			mesh: Mesh3d(element.graphics.mesh.clone()),
-			material: MeshMaterial3d(element.graphics.material.clone()),
+		cmd.spawn((
+			Mesh3d(element.graphics.mesh.clone()),
+			MeshMaterial3d(element.graphics.material.clone()),
 			transform,
-			..default()
-		})
+		))
 		.set_parent(root.0)
 		.insert(Name::new(format!("Object of {}",element.id)))
 		.insert(Pos::from(object_pos))

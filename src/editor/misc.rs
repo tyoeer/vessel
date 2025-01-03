@@ -78,29 +78,27 @@ pub fn setup_lights(
 		brightness: 600.,
 	});
 	
-	cmds.spawn(DirectionalLightBundle {
-		directional_light: DirectionalLight {
+	cmds.spawn((
+		DirectionalLight {
 			illuminance: light_consts::lux::OVERCAST_DAY / 2.,
 			shadows_enabled: false,
 			..default()
 		},
-		transform: Transform {
+		Transform {
 			translation: Vec3::new(1.0, 4.0, 2.0),
 			..default()
 		}.looking_at(Vec3::ZERO, Dir3::Y),
-		..default()
-	}).set_parent(root.0);
+	)).set_parent(root.0);
 	//counter light to differentiate the shadows
-	cmds.spawn(DirectionalLightBundle {
-		directional_light: DirectionalLight {
+	cmds.spawn((
+		DirectionalLight {
 			illuminance: light_consts::lux::OVERCAST_DAY / 7.,
 			shadows_enabled: false,
 			..default()
 		},
-		transform: Transform {
+		Transform {
 			translation: Vec3::new(-6.0, -1.0, -3.),
 			..default()
 		}.looking_at(Vec3::ZERO, Dir3::Y),
-		..default()
-	}).set_parent(root.0);
+	)).set_parent(root.0);
 }
