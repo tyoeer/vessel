@@ -21,6 +21,25 @@ use bevy_inspector_egui as bie;
 pub const FONT_SIZE: f32 = 12.;
 
 
+///Put the first part into a monospaced font
+pub fn mono_start(monospaced: impl AsRef<str>, normal: impl AsRef<str>) -> text::LayoutJob {
+	let mut text = text::LayoutJob::default();
+	text.append(
+		monospaced.as_ref(),
+		0.,
+		TextFormat {
+			font_id: FontId::monospace(FONT_SIZE),
+			..default()
+		}
+	);
+	text.append(
+		normal.as_ref(),
+		10.,
+		TextFormat::default(),
+	);
+	
+	text
+}
 
 pub fn collect_replication_groups(world: &World) -> Vec<Vec<ComponentId>> {
 	let rules = world.resource::<ReplicationRules>();
@@ -94,19 +113,19 @@ pub fn multiplayer_entities_ui(ui: &mut Ui, world: &mut World) {
 		);
 		ui.collapsing(RichText::new(label).font(FontId::monospace(FONT_SIZE)), |ui| {
 			if info.replicated {
-				ui.label("R: Has `Replicated` component");
+				ui.label(mono_start("R:","Has `Replicated` component"));
 			} else {
-				ui.label("_: `Replicated` component is missing!");
+				ui.label(mono_start("_:","`Replicated` component is missing!"));
 			}
 			if let Some(server_id) = info.mapping {
-				ui.label(format!("M: Is mapped to server entity {}", server_id));
+				ui.label(mono_start("M:",format!("Is mapped to server entity {}", server_id)));
 			} else {
-				ui.label(".: No known mapping to a server entity, probably because this is the server");
+				ui.label(mono_start(".:","No known mapping to a server entity, probably because this is the server"));
 			}
 			
 			ui.label("Groups:");
 			for (i, group) in info.groups.iter().enumerate() {
-				ui.label(format!("{i:2}: {group}"));
+				ui.label(mono_start(format!("{i:2}:"),group.to_string()));
 			}
 			
 			ui.separator();
@@ -141,20 +160,7 @@ pub fn groups_ui(ui: &mut Ui, world: &mut World) {
 				.expect("component in replication rule should be registered with the bevy world")
 		).map(shorten_component_name).collect::<Vec<_>>().join(", ");
 		
-		let mut heading = text::LayoutJob::default();
-		heading.append(
-			&format!("{number:2}"),
-			0.,
-			TextFormat {
-				font_id: FontId::monospace(FONT_SIZE),
-				..default()
-			}
-		);
-		heading.append(
-			&comp_names_short,
-			10.,
-			TextFormat::default(),
-		);
+		let heading = mono_start(format!("{number:2}"), comp_names_short);
 		ui.collapsing(heading, |ui| {
 			for component_id in rule {
 				let name = world.components()
