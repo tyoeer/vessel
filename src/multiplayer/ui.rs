@@ -1,14 +1,21 @@
 use bevy::{
 	prelude::*,
-	ecs::component::ComponentId,
+	ecs::{
+		component::ComponentId,
+		entity::EntityHashMap,
+	},
+	window::PrimaryWindow,
 };
 use bevy_replicon::{
 	prelude::*,
-	core::replication::replication_rules::ReplicationRules,
+	core::{
+		replication::replication_rules::ReplicationRules,
+		server_entity_map::ServerEntityMap,
+	},
 };
 use bevy_egui::egui::*;
+use bevy_inspector_egui as bie;
 
-use super::*;
 
 
 pub const FONT_SIZE: f32 = 12.;
@@ -76,19 +83,37 @@ pub fn multiplayer_entities_ui(ui: &mut Ui, world: &mut World) {
 	let infos = collect_entities(world);
 	
 	for (entity, info) in infos.iter() {
-		let name = bevy_inspector_egui::bevy_inspector::guess_entity_name(world, *entity);
+		let name = bie::bevy_inspector::guess_entity_name(world, *entity);
 		let label = format!(
 			"{}{}{} {}{}",
 			if info.replicated {'R'} else {'_'},
-			if info.groups.iter().any(|x| *x) {'G'} else {'.'},
 			if info.mapping.is_some() {'M'} else {'.'},
+			if info.groups.iter().any(|x| *x) {'G'} else {'.'},
 			name,
 			info.mapping.map(|se| format!(" server: {se}")).unwrap_or("".into()),
 		);
-		ui.label(RichText::new(label).font(FontId::monospace(FONT_SIZE)));
-		// egui::CollapsingHeader::new(name).show(ui, |ui| {
-		// 	bie::bevy_inspector::ui_for_entity(world, entity, ui);
-		// });
+		ui.collapsing(RichText::new(label).font(FontId::monospace(FONT_SIZE)), |ui| {
+			if info.replicated {
+				ui.label("R: Has `Replicated` component");
+			} else {
+				ui.label("_: `Replicated` component is missing!");
+			}
+			if let Some(server_id) = info.mapping {
+				ui.label(format!("M: Is mapped to server entity {}", server_id));
+			} else {
+				ui.label(".: No known mapping to a server entity, probably because this is the server");
+			}
+			
+			ui.label("Groups:");
+			for (i, group) in info.groups.iter().enumerate() {
+				ui.label(format!("{i:2}: {group}"));
+			}
+			
+			ui.separator();
+			ui.collapsing("Components", |ui| {
+				bie::bevy_inspector::ui_for_entity(world, *entity, ui);
+			})
+		});
 	}
 }
 
