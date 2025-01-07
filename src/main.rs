@@ -106,9 +106,9 @@ fn main() {
 	}, vessel_builder::build_vessel_system)
 	
 	.add_systems(OnEnter(GameState::WorldPlay), |mut nw: ResMut<NextState<worldplay::WorldState>>|
-		nw.set(worldplay::WorldState::Updating))
+		nw.set(worldplay::WorldState::Foreground))
 	.add_systems(OnEnter(GameState::EditVessel), |mut nw: ResMut<NextState<worldplay::WorldState>>|
-		nw.set(worldplay::WorldState::OnHold))
+		nw.set(worldplay::WorldState::Background))
 	.add_systems(Startup, setup_demo_track)
 	
 	.run();

@@ -26,7 +26,7 @@ impl Plugin for GameplayPlugin {
 		app.register_asset_reflect::<vessel::SimVessel>();
 		app.register_type::<vessel::Id>();
 		
-		app.add_systems(OnEnter(WorldState::Updating), (
+		app.add_systems(OnEnter(WorldState::Foreground), (
 			user::spawn_user,
 		));
 		app.add_systems(Update, (
@@ -36,7 +36,7 @@ impl Plugin for GameplayPlugin {
 				#[cfg(feature="user_interface")]
 				user::camera_ui,
 			)
-			.run_if(in_state(WorldState::Updating))
+			.run_if(in_state(WorldState::Foreground))
 		);
 		app.add_systems(Update, (
 				vessel::spawn_vessels.before(avian3d::prelude::PhysicsSet::Prepare),
@@ -51,13 +51,13 @@ impl Plugin for GameplayPlugin {
 #[derive(States, Default,Debug, Clone,Copy, PartialEq, Eq, Hash)]
 pub enum WorldState {
 	///World data is loaded and actively being updated
-	Updating,
+	Foreground,
 	///World data is loaded and present in the background, but not directly being interacted with
 	/// Used to keep multiplayer replication up to date in an easy manner
-	OnHold,
+	Background,
 	///World is not loaded, no world entities present
 	#[default]
-	NoWorld,
+	Unloaded,
 }
 
 #[derive(Debug, Clone, PartialEq,Eq, Hash)]
@@ -68,8 +68,8 @@ impl ComputedStates for WorldLoaded {
 	
 	fn compute(source: Self::SourceStates) -> Option<Self> {
 		match source {
-			WorldState::Updating | WorldState::OnHold => Some(Self),
-			WorldState::NoWorld => None,
+			WorldState::Foreground | WorldState::Background => Some(Self),
+			WorldState::Unloaded => None,
 		}
 	}
 }
