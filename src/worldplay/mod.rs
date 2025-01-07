@@ -12,62 +12,64 @@ use derive_more::{From, Into};
 pub mod vessel;
 pub mod user;
 
-pub struct GameplayPlugin<State: States> {
-	pub state: State,
-}
+pub struct GameplayPlugin;
 
-impl<State: States> Plugin for GameplayPlugin<State> {
+impl Plugin for GameplayPlugin {
 	fn build(&self, app: &mut App) {
+		app.init_state::<WorldState>();
+		app.add_computed_state::<WorldLoaded>();
+		app.enable_state_scoped_entities::<WorldLoaded>();
+		
 		app.init_resource::<user::CameraSettings>();
+		
 		app.init_asset::<vessel::SimVessel>();
 		app.register_asset_reflect::<vessel::SimVessel>();
 		app.register_type::<vessel::Id>();
-		app.add_systems(OnEnter(self.state.clone()), (
-			create_root,
-			(
-				user::spawn_user,
-			).after(create_root)
-		));
-		app.add_systems(OnExit(self.state.clone()), (
-			cleanup_root,
+		
+		app.add_systems(OnEnter(WorldState::Updating), (
+			user::spawn_user,
 		));
 		app.add_systems(Update, (
-				vessel::spawn_vessels.before(avian3d::prelude::PhysicsSet::Prepare),
 				#[cfg(feature="user_interface")]
 				user::read_user_input.before(vessel::move_vessel),
-				vessel::move_vessel.before(avian3d::prelude::PhysicsSet::StepSimulation),
 				user::update_camera,
 				#[cfg(feature="user_interface")]
 				user::camera_ui,
 			)
-			.run_if(in_state(self.state.clone()))
+			.run_if(in_state(WorldState::Updating))
+		);
+		app.add_systems(Update, (
+				vessel::spawn_vessels.before(avian3d::prelude::PhysicsSet::Prepare),
+				vessel::move_vessel.before(avian3d::prelude::PhysicsSet::StepSimulation),
+			)
+			.run_if(in_state(WorldLoaded))
 		);
 	}
 }
 
 
-
-
-
-///Entity all worldplay entities should be (indirect) children of for state management
-#[derive(Resource, From, Into, Clone)]
-pub struct GameplayRoot(pub Entity);
-
-pub fn create_root(
-	mut cmds: Commands
-) {
-	let root = cmds.spawn_empty()
-		.insert((Transform::default(), Visibility::default()))
-		.insert(Name::new("Worldplay Root"))
-		.id();
-	cmds.insert_resource(GameplayRoot(root));
+#[derive(States, Default,Debug, Clone,Copy, PartialEq, Eq, Hash)]
+pub enum WorldState {
+	///World data is loaded and actively being updated
+	Updating,
+	///World data is loaded and present in the background, but not directly being interacted with
+	/// Used to keep multiplayer replication up to date in an easy manner
+	OnHold,
+	///World is not loaded, no world entities present
+	#[default]
+	NoWorld,
 }
 
-pub fn cleanup_root(
-	mut cmds: Commands,
-	root: Res<GameplayRoot>,
-) {
-	let root = root.0;
-	cmds.entity(root).despawn_recursive();
-	cmds.remove_resource::<GameplayRoot>();
+#[derive(Debug, Clone, PartialEq,Eq, Hash)]
+pub struct WorldLoaded;
+
+impl ComputedStates for WorldLoaded {
+	type SourceStates = WorldState;
+	
+	fn compute(source: Self::SourceStates) -> Option<Self> {
+		match source {
+			WorldState::Updating | WorldState::OnHold => Some(Self),
+			WorldState::NoWorld => None,
+		}
+	}
 }

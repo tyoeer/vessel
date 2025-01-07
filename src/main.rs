@@ -95,9 +95,7 @@ fn main() {
 	});
 	
 	app
-	.add_plugins(worldplay::GameplayPlugin {
-		state: GameState::WorldPlay
-	});
+	.add_plugins(worldplay::GameplayPlugin);
 	
 	//Depends on the GameplayPlugin, so should be added later
 	app.add_plugins(multiplayer::MultiplayerPlugin);
@@ -107,6 +105,10 @@ fn main() {
 		entered: GameState::WorldPlay
 	}, vessel_builder::build_vessel_system)
 	
+	.add_systems(OnEnter(GameState::WorldPlay), |mut nw: ResMut<NextState<worldplay::WorldState>>|
+		nw.set(worldplay::WorldState::Updating))
+	.add_systems(OnEnter(GameState::EditVessel), |mut nw: ResMut<NextState<worldplay::WorldState>>|
+		nw.set(worldplay::WorldState::OnHold))
 	.add_systems(Startup, setup_demo_track)
 	
 	.run();

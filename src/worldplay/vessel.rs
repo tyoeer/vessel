@@ -61,7 +61,6 @@ impl Default for VesselProperties {
 
 pub fn spawn_vessels(
 	mut cmds: Commands,
-	root: Res<GameplayRoot>,
 	todo: Query<(Entity, &Id), Without<VesselSpawned>>,
 	vessels: Res<Assets<SimVessel>>,
 	elements: Res<Catalogue>,
@@ -84,7 +83,7 @@ pub fn spawn_vessels(
 			.insert(Visibility::default())
 			.insert(RigidBody::Dynamic)
 			.insert(Friction::new(0.)) // extra friction is provided by the race track itself
-			.set_parent(root.0)
+			.insert(StateScoped(WorldLoaded))
 			.id();
 		
 		for (elem_id, transform) in &vessel.graphics {
