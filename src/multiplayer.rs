@@ -9,7 +9,7 @@ use avian3d::prelude::{AngularVelocity, LinearVelocity, Position, Rotation};
 use serde::{Serialize, Deserialize};
 
 use crate::worldplay::{
-	self, user, vessel,
+	self, user, vessel, WorldState
 };
 
 
@@ -28,7 +28,7 @@ impl Plugin for MultiplayerPlugin {
 			.add_client_event::<NewUserVessel>(ChannelKind::Unordered)
 			.add_server_event::<AddVessel>(ChannelKind::Unordered)
 			
-			.add_systems(OnEnter(crate::GameState::WorldPlay), send_user_vessel.after(user::spawn_user).run_if(client_connected))
+			.add_systems(OnEnter(WorldState::Foreground), send_user_vessel.after(user::spawn_user).run_if(client_connected))
 		;
 		
 		// app.add_plugins(bevy_inspector_egui::quick::FilterQueryInspectorPlugin::<With<MultiPlayer>>::new());
@@ -47,7 +47,7 @@ impl Plugin for MultiplayerPlugin {
 			.add_systems(Update, mark_players.after(vessel::move_vessel))
 			.add_systems(Update, ui::debug_ui)
 			.add_systems(
-				OnEnter(crate::GameState::WorldPlay),
+				OnEnter(WorldState::Foreground),
 				mark_server_user.after(user::spawn_user).run_if(server_running)
 			);
 		
