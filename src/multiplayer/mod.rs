@@ -13,8 +13,8 @@ use crate::worldplay::{
 };
 
 
-mod ui;
-
+pub mod ui;
+pub mod network;
 
 pub struct MultiplayerPlugin;
 
@@ -30,17 +30,6 @@ impl Plugin for MultiplayerPlugin {
 			
 			.add_systems(OnEnter(WorldState::Foreground), send_user_vessel.after(user::spawn_user).run_if(client_connected))
 		;
-		
-		// app.add_plugins(bevy_inspector_egui::quick::FilterQueryInspectorPlugin::<With<MultiPlayer>>::new());
-		/*
-		app.add_plugins(bevy_inspector_egui::quick::FilterQueryInspectorPlugin::<(
-			With<MultiPlayer>,
-			With<vessel::Id>,
-			With<Position>,
-			With<Rotation>,
-			With<LinearVelocity>,
-			With<AngularVelocity>,
-		)>::new());// */
 		
 		#[cfg(feature="user_interface")]
 		app

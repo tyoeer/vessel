@@ -4,9 +4,9 @@ use bevy::{input::mouse::{MouseButtonInput, MouseWheel}, prelude::*};
 mod editor;
 mod worldplay;
 mod vessel_builder;
-mod network;
 mod multiplayer;
 
+use multiplayer::network;
 
 fn main() {
 	let mut app = App::new();
