@@ -23,7 +23,6 @@ use std::{
 pub fn network_ui(
 	mut contexts: bevy_egui::EguiContexts,
 	mut cmds: Commands,
-	channels: Res<RepliconChannels>, // used for network setup
 	client: Res<RepliconClient>,
 	server: Res<RepliconServer>,
 	connected_clients: Res<ConnectedClients>,
@@ -65,11 +64,11 @@ pub fn network_ui(
 			
 			if ui.button("Connect as client").clicked() {
 				if let Ok(ip) = IpAddr::from_str(&ip_input) {
-					setup_client(&mut cmds, &channels, ip);
+					cmds.trigger(SetupClient {server_ip: ip});
 				}
 			}
 			if ui.button("Run server").clicked() {
-				setup_server(&mut cmds, &channels);
+				cmds.trigger(SetupServer);
 			}
 		}
 	});
@@ -80,10 +79,18 @@ pub fn network_ui(
 #[cfg(not(feature="user_interface"))]
 pub fn setup_server_system(
 	mut cmds: Commands,
-	channels: Res<RepliconChannels>,
 ) {
 	info!("starting server...");
-	setup_server(&mut cmds, &channels);
+	cmds.trigger(SetupServer);
+}
+
+
+#[derive(Event)]
+pub struct SetupServer;
+
+#[derive(Event)]
+pub struct SetupClient {
+	pub server_ip: IpAddr,
 }
 
 
@@ -92,8 +99,9 @@ const PROTOCOL_ID: u64 = 0; //it's what the example does 🤷
 
 
 pub fn setup_server(
-	cmds: &mut Commands,
-	channels: &RepliconChannels,
+	_trigger: Trigger<SetupServer>,
+	mut cmds: Commands,
+	channels: Res<RepliconChannels>,
 ) {
 	let server_channels_config = channels.get_server_configs();
 	let client_channels_config = channels.get_client_configs();
@@ -120,9 +128,9 @@ pub fn setup_server(
 }
 
 pub fn setup_client(
-	cmds: &mut Commands,
-	channels: &RepliconChannels,
-	server_ip: IpAddr,
+	trigger: Trigger<SetupClient>,
+	mut cmds: Commands,
+	channels: Res<RepliconChannels>,
 ) {
 	let server_channels_config = channels.get_server_configs();
 	let client_channels_config = channels.get_client_configs();
@@ -135,7 +143,7 @@ pub fn setup_client(
 
 	let current_time = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).expect("system time should be after the unix epoch");
 	let client_id = current_time.as_millis() as u64;
-	let server_addr = SocketAddr::new(server_ip, PORT);
+	let server_addr = SocketAddr::new(trigger.server_ip, PORT);
 	let socket = UdpSocket::bind((Ipv4Addr::UNSPECIFIED, 0)).unwrap();
 	let authentication = ClientAuthentication::Unsecure {
 		client_id,

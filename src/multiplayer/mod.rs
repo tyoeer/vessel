@@ -21,6 +21,8 @@ pub struct MultiplayerPlugin;
 impl Plugin for MultiplayerPlugin {
 	fn build(&self, app: &mut App) {
 		app
+			.add_observer(network::setup_client)
+			.add_observer(network::setup_server)
 			.init_resource::<ClientOwnedEntities>()
 			
 			.replicate_group::<(MultiPlayer, vessel::Id, Position, Rotation, LinearVelocity, AngularVelocity)>()
