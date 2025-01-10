@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 
 use bevy::{
-	prelude::*,
-	color::palettes::css,
+	color::palettes::css, prelude::*, window::PrimaryWindow
 };
 use bevy_replicon::prelude::*;
 use avian3d::prelude::{AngularVelocity, LinearVelocity, Position, Rotation};
@@ -37,6 +36,10 @@ impl Plugin for MultiplayerPlugin {
 		app
 			.add_systems(Update, mark_players.after(vessel::move_vessel))
 			.add_systems(Update, ui::debug_ui)
+			.add_systems(Update, (
+				set_server_window_title.run_if(server_just_started),
+				set_client_window_title.run_if(client_just_connected),
+			))
 			.add_systems(
 				OnEnter(WorldState::Foreground),
 				mark_server_user.after(user::spawn_user).run_if(server_running)
@@ -63,8 +66,32 @@ impl Plugin for MultiplayerPlugin {
 	}
 }
 
+pub fn server_just_started(
+    mut last_running: Local<bool>,
+    server: Option<Res<RepliconServer>>,
+) -> bool {
+    let running = server.filter(|server| server.is_running()).is_some();
 
+    let just_stopped = !*last_running && running;
+    *last_running = running;
+    just_stopped
+}
 
+fn set_server_window_title(
+	window: Option<Single<&mut Window, With<PrimaryWindow>>>,
+) {
+	if let Some(mut window) = window {
+		window.title = "Server".into();
+	}
+}
+fn set_client_window_title(
+	window: Option<Single<&mut Window, With<PrimaryWindow>>>,
+	client: Res<RepliconClient>,
+) {
+	if let Some(mut window) = window {
+		window.title = format!("Client {}", client.id().expect("system `set_client_window_title` should only be called when the client is connected").get());
+	}
+}
 
 
 ///Maps [ClientId]s to the [Entity] they're controlling
