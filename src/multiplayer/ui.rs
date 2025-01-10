@@ -95,11 +95,18 @@ pub fn collect_entities(world: &mut World) -> EntityHashMap::<EntityInfo> {
 		}
 	}
 	
+	//Make sure all the group Vecs have false values, even the entities collected through other means
+	for entity_info in infos.values_mut() {
+		entity_info.groups.resize(group_count, false)
+	}
+	
 	infos
 }
 
 pub fn multiplayer_entities_ui(ui: &mut Ui, world: &mut World) {
 	let infos = collect_entities(world);
+	
+	let groups = collect_replication_groups(world);
 	
 	for (entity, info) in infos.iter() {
 		let name = bie::bevy_inspector::guess_entity_name(world, *entity);
@@ -130,7 +137,23 @@ pub fn multiplayer_entities_ui(ui: &mut Ui, world: &mut World) {
 			
 			ui.label("Groups:");
 			for (i, group) in info.groups.iter().enumerate() {
-				ui.label(mono_start(format!("{i:2}:"),group.to_string()));
+				let number = format!("{i:2}:");
+				if *group {
+					ui.label(mono_start(number,"✅ All components present"));
+				} else {
+					let group_comps = &groups[i];
+					let missing_comps = group_comps.iter()
+						.filter(|comp| !world.entity(*entity).contains_id(**comp))
+						.map(|comp_id| world
+							.components()
+							.get_name(*comp_id)
+							.expect("component in replication rule should be registered with the bevy world")
+						)
+						.map(shorten_component_name)
+						.collect::<Vec<_>>()
+						.join(", ");
+					ui.label(mono_start(number, format!("❌ Missing: {missing_comps}")));
+				}
 			}
 			
 			ui.separator();
