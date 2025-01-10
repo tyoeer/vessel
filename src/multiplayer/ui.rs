@@ -122,6 +122,11 @@ pub fn multiplayer_entities_ui(ui: &mut Ui, world: &mut World) {
 			} else {
 				ui.label(mono_start(".:","No known mapping to a server entity, probably because this is the server"));
 			}
+			if info.groups.iter().any(|x| *x) {
+				ui.label(mono_start("G:","The components for at least 1 replication group are present"));
+			} else {
+				ui.label(mono_start(".:","Entity matches no replication groups"));
+			}
 			
 			ui.label("Groups:");
 			for (i, group) in info.groups.iter().enumerate() {
